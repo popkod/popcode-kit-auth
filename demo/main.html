@@ -1,0 +1,15 @@
+<div class="container">
+    <button
+        class="btn btn-default"
+        ng-click="login()">
+        Login
+    </button>
+
+    <div class="row">
+        <div class="col-sm-12" ng-repeat="user in users track by $index">
+            <h3>{{user.name}}</h3>
+            <h4>{{user.email}}</h4>
+            <p>role: {{user.role}}</p>
+        </div>
+    </div>
+</div>
