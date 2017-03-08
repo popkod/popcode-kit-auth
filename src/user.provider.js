@@ -1,5 +1,7 @@
 'use strict';
 
+let resource;
+
 export class UserResourceConfig{
     constructor(){
         this.endpoint = '/api/users';
@@ -9,6 +11,9 @@ export class UserResourceConfig{
                 method: 'GET',
                 isArray: true
             },
+            update: {
+                method: 'PUT'
+            },
             me: {
                 method: 'GET',
                 params: {
@@ -16,11 +21,12 @@ export class UserResourceConfig{
                 }
             }
         };
-    }
+    };
 };
 
 export class UserResource{
     constructor({endpoint, paramDefaults, actions}, $resource){
+        resource = $resource;
         return $resource(`${endpoint}/:id/:controller`, paramDefaults, actions);
     }
 };

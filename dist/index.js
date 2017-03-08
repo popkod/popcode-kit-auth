@@ -324,6 +324,8 @@ function routerDecorator($rootScope, $state, PCAuth){
 /* harmony export (immutable) */ __webpack_exports__["a"] = PCUserProvider;
 
 
+let resource;
+
 class UserResourceConfig{
     constructor(){
         this.endpoint = '/api/users';
@@ -333,6 +335,9 @@ class UserResourceConfig{
                 method: 'GET',
                 isArray: true
             },
+            update: {
+                method: 'PUT'
+            },
             me: {
                 method: 'GET',
                 params: {
@@ -340,13 +345,14 @@ class UserResourceConfig{
                 }
             }
         };
-    }
+    };
 }
 /* unused harmony export UserResourceConfig */
 ;
 
 class UserResource{
     constructor({endpoint, paramDefaults, actions}, $resource){
+        resource = $resource;
         return $resource(`${endpoint}/:id/:controller`, paramDefaults, actions);
     }
 }

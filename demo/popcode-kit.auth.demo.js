@@ -4,15 +4,18 @@ angular.module('popcode-kit.demo.auth', [
     'popcode-kit.auth',
     'ui.router'
 ])
-    .controller('MainCtrl', function($scope, PCUser){
+    .constant('Settings', {
+        apiUrl: 'http://192.168.200.211/api/'
+    })
+    .controller('MainCtrl', function($scope, PCUser, $resource, Settings){
         $scope.users = PCUser.index();
     })
     .config(function(PCUserProvider,
         $stateProvider, $urlRouterProvider,
-        $locationProvider){
+        $locationProvider, Settings){
 
         // console.log('PCUserProvider', PCUserProvider);
-        PCUserProvider.config.endpoint = 'http://192.168.200.211/api/users';
+        PCUserProvider.config.endpoint = Settings.apiUrl+'users';
 
         $urlRouterProvider
             .otherwise('/');

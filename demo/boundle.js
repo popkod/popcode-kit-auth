@@ -366,6 +366,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /* harmony export (immutable) */
     __webpack_exports__["a"] = PCUserProvider;
 
+    var resource = void 0;
+
     var UserResourceConfig = function UserResourceConfig() {
         _classCallCheck(this, UserResourceConfig);
 
@@ -375,6 +377,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             index: {
                 method: 'GET',
                 isArray: true
+            },
+            update: {
+                method: 'PUT'
             },
             me: {
                 method: 'GET',
@@ -396,6 +401,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         _classCallCheck(this, UserResource);
 
+        resource = $resource;
         return $resource(endpoint + '/:id/:controller', paramDefaults, actions);
     };
     /* unused harmony export UserResource */
