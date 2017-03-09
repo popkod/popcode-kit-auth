@@ -65,6 +65,7 @@ export class UserResource{
     }
 
     save(data, userList, $form){
+        userList = userList || $form;
         let instance = new this.resource(data);
         if(instance.id){
             return instance.$update({id:data.id}, function(result){

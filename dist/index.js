@@ -366,11 +366,9 @@ class UserResource{
                 if(response.status == 400 && response.data.error){
                     Object.keys(response.data.error).forEach(function(key){
                         let value = response.data.error[key];
-                        console.log(key, value);
                         $form[key].$error.error = value;
                     });
                 }
-                console.log('a',$form);
             }
         }
     }
@@ -393,6 +391,7 @@ class UserResource{
     }
 
     save(data, userList, $form){
+        userList = userList || $form;
         let instance = new this.resource(data);
         if(instance.id){
             return instance.$update({id:data.id}, function(result){

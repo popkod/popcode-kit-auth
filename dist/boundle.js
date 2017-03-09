@@ -418,11 +418,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         if (response.status == 400 && response.data.error) {
                             Object.keys(response.data.error).forEach(function (key) {
                                 var value = response.data.error[key];
-                                console.log(key, value);
                                 $form[key].$error.error = value;
                             });
                         }
-                        console.log('a', $form);
                     }
                 };
             }
@@ -451,6 +449,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: 'save',
             value: function save(data, userList, $form) {
+                userList = userList || $form;
                 var instance = new this.resource(data);
                 if (instance.id) {
                     return instance.$update({ id: data.id }, function (result) {
