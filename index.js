@@ -7,7 +7,7 @@ import {PCUserProvider} from './src/user.provider';
 import {routerDecorator} from './src/router.decorator';
 
 const MODULE_NAME = 'popcode-kit.auth';
-let dependencies = ['ngCookies', 'ui.router', 'ngResource'];
+let dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash'];
 
 checkModulesLoaded(dependencies);
 

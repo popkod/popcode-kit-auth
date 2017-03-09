@@ -366,13 +366,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /* harmony export (immutable) */
     __webpack_exports__["a"] = PCUserProvider;
 
-    var resource = void 0;
+    var resourceProvider = void 0;
+    var _lodash = void 0;
 
     var UserResourceConfig = function UserResourceConfig() {
         _classCallCheck(this, UserResourceConfig);
 
         this.endpoint = '/api/users';
-        this.paramDefaults = {};
+        this.paramDefaults = {
+            'id': '@id'
+        };
         this.actions = {
             index: {
                 method: 'GET',
@@ -394,16 +397,71 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     ;
 
-    var UserResource = function UserResource(_ref2, $resource) {
-        var endpoint = _ref2.endpoint,
-            paramDefaults = _ref2.paramDefaults,
-            actions = _ref2.actions;
+    var UserResource = function () {
+        function UserResource(_ref2, $resource) {
+            var endpoint = _ref2.endpoint,
+                paramDefaults = _ref2.paramDefaults,
+                actions = _ref2.actions;
 
-        _classCallCheck(this, UserResource);
+            _classCallCheck(this, UserResource);
 
-        resource = $resource;
-        return $resource(endpoint + '/:id/:controller', paramDefaults, actions);
-    };
+            resourceProvider = $resource;
+            this.resource = $resource(endpoint + '/:id/:controller', paramDefaults, actions);
+        }
+
+        _createClass(UserResource, [{
+            key: 'errorHandler',
+            value: function errorHandler(response) {
+                console.error(response);
+            }
+        }, {
+            key: 'index',
+            value: function index() {
+                return this.resource.index();
+            }
+        }, {
+            key: 'get',
+            value: function get(query) {
+                return this.resource.get(query);
+            }
+        }, {
+            key: 'delete',
+            value: function _delete(userInstance, userList) {
+                return userInstance.$delete({ id: userInstance.id }, function () {
+                    if (userList) {
+                        var index = _lodash.findIndex(userList, { id: userInstance.id });
+                        if (index > -1) {
+                            userList.splice(index, 1);
+                        }
+                    }
+                }, this.errorHandler);
+            }
+        }, {
+            key: 'save',
+            value: function save(data, userList) {
+                var instance = new this.resource(data);
+                if (instance.id) {
+                    return instance.$update({ id: data.id }, function (result) {
+                        if (userList) {
+                            var index = _lodash.findIndex(userList, { id: instance.id });
+                            if (index > -1) {
+                                userList.splice(index, 1, result);
+                            }
+                        }
+                    }, this.errorHandler);
+                } else {
+                    console.log(3);
+                    return instance.$save(function (result) {
+                        if (userList) {
+                            userList.push(result);
+                        }
+                    }, this.errorHandler);
+                }
+            }
+        }]);
+
+        return UserResource;
+    }();
     /* unused harmony export UserResource */
 
 
@@ -415,7 +473,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         self.config = new UserResourceConfig();
 
-        this.$get = function ($resource) {
+        this.$get = function ($resource, lodash) {
+            _lodash = lodash;
             return new UserResource(self.config, $resource);
         };
     };
@@ -435,7 +494,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /* harmony import */var __WEBPACK_IMPORTED_MODULE_4__src_router_decorator__ = __webpack_require__(3);
 
     var MODULE_NAME = 'popcode-kit.auth';
-    var dependencies = ['ngCookies', 'ui.router', 'ngResource'];
+    var dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash'];
 
     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__src_utils__["a" /* checkModulesLoaded */])(dependencies);
 

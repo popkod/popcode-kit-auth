@@ -12,10 +12,55 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-12" ng-repeat="user in users track by $index">
-            <h3>{{user.name}}</h3>
-            <h4>{{user.email}}</h4>
-            <p>role: {{user.role.name}}</p>
+        <ul class="list-group">
+            <li class="list-group-item" ng-repeat="user in users track by $index">
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h3>{{user.name}}</h3>
+                        <h4>{{user.email}}</h4>
+                        <p>role: {{user.role}}</p>
+                    </div>
+                    <div class="col-sm-2 text-right">
+                        <button class="btn btn-danger" ng-click="delete(user)">Delete</button>
+                        <button class="btn btn-danger" ng-click="edit(user)">Edit</button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="input-group">
+                <span class="input-group-addon">Name</span>
+                <input type="text" ng-model="user.name">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="input-group">
+                <span class="input-group-addon">Email</span>
+                <input type="text" ng-model="user.email">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="input-group">
+                <span class="input-group-addon">Pass</span>
+                <input type="text" ng-model="user.password">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="input-group">
+                <span class="input-group-addon">Pass conf</span>
+                <input type="text" ng-model="user.password_confirmation">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="input-group">
+                <span class="input-group-addon">Role</span>
+                <input type="number" ng-model="user.role">
+            </div>
+        </div>
+        <div class="col-sm-12 text-center">
+            <button class="btn btn-success" ng-click="save()">Save</button>
         </div>
     </div>
 </div>

@@ -324,12 +324,15 @@ function routerDecorator($rootScope, $state, PCAuth){
 /* harmony export (immutable) */ __webpack_exports__["a"] = PCUserProvider;
 
 
-let resource;
+let resourceProvider;
+let _lodash;
 
 class UserResourceConfig{
     constructor(){
         this.endpoint = '/api/users';
-        this.paramDefaults = {};
+        this.paramDefaults = {
+            'id' : '@id'
+        };
         this.actions = {
             index:  {
                 method: 'GET',
@@ -352,8 +355,48 @@ class UserResourceConfig{
 
 class UserResource{
     constructor({endpoint, paramDefaults, actions}, $resource){
-        resource = $resource;
-        return $resource(`${endpoint}/:id/:controller`, paramDefaults, actions);
+        resourceProvider = $resource;
+        this.resource = $resource(`${endpoint}/:id/:controller`, paramDefaults, actions);
+    }
+
+    errorHandler(response){
+        console.error(response);
+    }
+
+    index(){
+        return this.resource.index();
+    }
+
+    get(query){
+        return this.resource.get(query);
+    }
+
+    delete(userInstance, userList){
+        return userInstance.$delete({id: userInstance.id}, function(){
+            if(userList){
+                let index = _lodash.findIndex(userList, {id: userInstance.id});
+                if(index > -1){ userList.splice(index, 1); }
+            }
+        }, this.errorHandler);
+    }
+
+    save(data, userList){
+        let instance = new this.resource(data);
+        if(instance.id){
+            return instance.$update({id:data.id}, function(result){
+                if(userList){
+                    let index = _lodash.findIndex(userList, {id: instance.id});
+                    if(index > -1){ userList.splice(index, 1, result); }
+                }
+            }, this.errorHandler);
+        }else{
+            console.log(3);
+            return instance.$save(function(result){
+                if(userList){
+                    userList.push(result);
+                }
+            }, this.errorHandler);
+        }
     }
 }
 /* unused harmony export UserResource */
@@ -365,7 +408,9 @@ function PCUserProvider(){
 
     self.config = new UserResourceConfig();
 
-    this.$get = function($resource){
+    this.$get = function($resource, lodash)
+    {
+        _lodash = lodash;
         return new UserResource(self.config, $resource);
     };
 
@@ -392,7 +437,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 const MODULE_NAME = 'popcode-kit.auth';
-let dependencies = ['ngCookies', 'ui.router', 'ngResource'];
+let dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash'];
 
 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__src_utils__["a" /* checkModulesLoaded */])(dependencies);
 
