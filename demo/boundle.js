@@ -411,8 +411,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         _createClass(UserResource, [{
             key: 'errorHandler',
-            value: function errorHandler(response) {
-                console.error(response);
+            value: function errorHandler($form) {
+                return function (response) {
+                    console.error(response);
+                    if ($form) {
+                        if (response.status == 400 && response.data.error) {
+                            Object.keys(response.data.error).forEach(function (key) {
+                                var value = response.data.error[key];
+                                console.log(key, value);
+                                $form[key].$error.error = value;
+                            });
+                        }
+                        console.log('a', $form);
+                    }
+                };
             }
         }, {
             key: 'index',
@@ -438,7 +450,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: 'save',
-            value: function save(data, userList) {
+            value: function save(data, userList, $form) {
                 var instance = new this.resource(data);
                 if (instance.id) {
                     return instance.$update({ id: data.id }, function (result) {
@@ -448,14 +460,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                                 userList.splice(index, 1, result);
                             }
                         }
-                    }, this.errorHandler);
+                    }, this.errorHandler($form));
                 } else {
-                    console.log(3);
                     return instance.$save(function (result) {
                         if (userList) {
                             userList.push(result);
                         }
-                    }, this.errorHandler);
+                    }, this.errorHandler($form));
                 }
             }
         }]);

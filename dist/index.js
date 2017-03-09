@@ -359,8 +359,20 @@ class UserResource{
         this.resource = $resource(`${endpoint}/:id/:controller`, paramDefaults, actions);
     }
 
-    errorHandler(response){
-        console.error(response);
+    errorHandler($form){
+        return function(response){
+            console.error(response);
+            if($form){
+                if(response.status == 400 && response.data.error){
+                    Object.keys(response.data.error).forEach(function(key){
+                        let value = response.data.error[key];
+                        console.log(key, value);
+                        $form[key].$error.error = value;
+                    });
+                }
+                console.log('a',$form);
+            }
+        }
     }
 
     index(){
@@ -380,7 +392,7 @@ class UserResource{
         }, this.errorHandler);
     }
 
-    save(data, userList){
+    save(data, userList, $form){
         let instance = new this.resource(data);
         if(instance.id){
             return instance.$update({id:data.id}, function(result){
@@ -388,14 +400,13 @@ class UserResource{
                     let index = _lodash.findIndex(userList, {id: instance.id});
                     if(index > -1){ userList.splice(index, 1, result); }
                 }
-            }, this.errorHandler);
+            }, this.errorHandler($form));
         }else{
-            console.log(3);
             return instance.$save(function(result){
                 if(userList){
                     userList.push(result);
                 }
-            }, this.errorHandler);
+            }, this.errorHandler($form));
         }
     }
 }

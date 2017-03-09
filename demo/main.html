@@ -29,38 +29,55 @@
         </ul>
     </div>
     <div class="row">
-        <div class="col-sm-4">
-            <div class="input-group">
-                <span class="input-group-addon">Name</span>
-                <input type="text" ng-model="user.name">
+        <form class="" method="post" name="userForm" ng-submit="save(userForm)" novalidate>
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <span class="input-group-addon">Name</span>
+                    <input type="text" ng-model="user.name" name="name">
+                </div>
+                <div ng-show="userForm.name.$error.error">
+                    <p ng-repeat="error in userForm.name.$error.error track by $index">{{error}}</p>
+                </div>
             </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="input-group">
-                <span class="input-group-addon">Email</span>
-                <input type="text" ng-model="user.email">
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <span class="input-group-addon">Email</span>
+                    <input type="text" ng-model="user.email" name="email">
+                </div>
+                <div ng-show="userForm.email.$error.error">
+                    <p ng-repeat="error in userForm.email.$error.error track by $index">{{error}}</p>
+                </div>
             </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="input-group">
-                <span class="input-group-addon">Pass</span>
-                <input type="text" ng-model="user.password">
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <span class="input-group-addon">Pass</span>
+                    <input type="text" ng-model="user.password" name="password">
+                </div>
+                <div ng-show="userForm.password.$error.error">
+                    <p ng-repeat="error in userForm.password.$error.error track by $index">{{error}}</p>
+                </div>
             </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="input-group">
-                <span class="input-group-addon">Pass conf</span>
-                <input type="text" ng-model="user.password_confirmation">
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <span class="input-group-addon">Pass conf</span>
+                    <input type="text" ng-model="user.password_confirmation" name="password_confirmation">
+                    <div ng-show="userForm.password_confirmation.$error.error">
+                        <p ng-repeat="error in userForm.password_confirmation.$error.error track by $index">{{error}}</p>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="input-group">
-                <span class="input-group-addon">Role</span>
-                <input type="number" ng-model="user.role">
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <span class="input-group-addon">Role</span>
+                    <input type="number" ng-model="user.role" name="role">
+                </div>
+                <div ng-show="userForm.role.$error.error">
+                    <p ng-repeat="error in userForm.role.$error.error track by $index">{{error}}</p>
+                </div>
             </div>
-        </div>
-        <div class="col-sm-12 text-center">
-            <button class="btn btn-success" ng-click="save()">Save</button>
-        </div>
+            <div class="col-sm-12 text-center">
+                <button class="btn btn-success" type="submit">Save</button>
+            </div>
+        </form>
     </div>
 </div>
