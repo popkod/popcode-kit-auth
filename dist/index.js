@@ -190,7 +190,7 @@ class User{
  */
 class AuthConfig{
     constructor(){
-        this.endpoint = '/api/login';
+        this.endpoint = '/api/';
     }
 }
 /* unused harmony export AuthConfig */

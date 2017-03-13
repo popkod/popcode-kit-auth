@@ -235,7 +235,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var AuthConfig = function AuthConfig() {
         _classCallCheck(this, AuthConfig);
 
-        this.endpoint = '/api/login';
+        this.endpoint = '/api/';
     };
     /* unused harmony export AuthConfig */
 

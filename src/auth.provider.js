@@ -45,7 +45,7 @@ export class User{
  */
 export class AuthConfig{
     constructor(){
-        this.endpoint = '/api/login';
+        this.endpoint = '/api/';
     }
 };
 
