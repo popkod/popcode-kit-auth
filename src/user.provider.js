@@ -67,6 +67,14 @@ export class UserResource{
     }
 
     /**
+     * Get the current user
+     * @return {Promise}
+     */
+    me(){
+        return this.resource.me();
+    }
+
+    /**
      * Deletes an item
      * @param   {object}            data    user data
      * @param   {array}(optional)   list    list of users we will get out the user object from

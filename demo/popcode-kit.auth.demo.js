@@ -53,10 +53,18 @@ angular.module('popcode-kit.demo.auth', [
 
     })
     .controller('LoginCtrl', function($scope, PCAuth){
+        PCAuth.me.then(function(me){
+            $scope.me = me;
+            console.log('Me', $scope.me);
+            console.log('Has role 1?', $scope.me.hasRole(1));
+            console.log('Has role 2?', $scope.me.hasRole(2));
+            console.log('Has role 1|2?', $scope.me.hasRole([1,2]));
+            console.log('Has role 3|4?', $scope.me.hasRole([3,4]));
+        });
         $scope.login = function($form){
             PCAuth.login($scope.user, $form)
                 .then(function(data){
-                    console.log('user logged in', data);
+                    console.log('current user', PCAuth.me);
                 })
                 .catch(function(response){
                     console.log('Failed to login', response);
@@ -68,7 +76,7 @@ angular.module('popcode-kit.demo.auth', [
         $locationProvider, Settings){
 
         PCUserProvider.config.endpoint = Settings.apiUrl+'users';
-        PCAuthProvider.config.endpoint = Settings.apiUrl+'login';
+        PCAuthProvider.config.endpoint = Settings.apiUrl;
 
         $urlRouterProvider
             .otherwise('/');
