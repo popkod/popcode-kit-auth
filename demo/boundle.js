@@ -482,7 +482,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if ((typeof list === 'undefined' ? 'undefined' : _typeof(list)) !== undefined) {
                         var index = _lodash.findIndex(list, { id: instance.id });
                         if (index > -1) {
-                            instance.splice(index, 1);
+                            list.splice(index, 1);
                         }
                     }
                 }, this.errorHandler());

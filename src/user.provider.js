@@ -91,7 +91,7 @@ export class UserResource{
         return instance.$delete({id: instance.id}, function(){
             if(typeof list !== undefined){
                 let index = _lodash.findIndex(list, {id: instance.id});
-                if(index > -1){ instance.splice(index, 1); }
+                if(index > -1){ list.splice(index, 1); }
             }
         }, this.errorHandler());
     }
