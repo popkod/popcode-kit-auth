@@ -27,63 +27,120 @@ export class UserResourceConfig{
     };
 };
 
+/**
+ * User resource class
+ * responsible for user CRUD
+ */
 export class UserResource{
     constructor({endpoint, paramDefaults, actions}, $resource){
         resourceProvider = $resource;
         this.resource = $resource(`${endpoint}/:id/:controller`, paramDefaults, actions);
     }
 
+    /**
+     * Pushes error messages to an angular form
+     * @param   {object}    $form   the reference of the form
+     * @return  {function}
+     */
     errorHandler($form){
         return function(response){
-            console.error(response);
-            if($form){
+            if($form !== undefined && typeof $form.$setPristine == 'function'){
                 if(response.status == 400 && response.data.error){
-                    Object.keys(response.data.error).forEach(function(key){
+                    Object.keys($form).forEach(function(key){
+                        if(/$/.test()){
+
+                        }
                         let value = response.data.error[key];
-                        $form[key].$error.error = value;
+                        if($form[key] && $form[key].$error)
+                            $form[key].$error.error = value;
                     });
                 }
             }
         }
     }
 
-    index(){
-        return this.resource.index();
+    /**
+     * Get a lit of users
+     * @param   {object}(optional)  query   additional query
+     * @return  {Promise}
+     */
+    index(query = {}){
+        return this.resource.index(query);
     }
 
-    get(query){
+    /**
+     * Get a user
+     * @param   {object}    query   additional query
+     * @return  {Promise}
+     */
+    get(query = {}){
         return this.resource.get(query);
     }
 
-    delete(userInstance, userList){
-        return userInstance.$delete({id: userInstance.id}, function(){
-            if(userList){
-                let index = _lodash.findIndex(userList, {id: userInstance.id});
-                if(index > -1){ userList.splice(index, 1); }
+    /**
+     * Deletes an item
+     * @param   {object}            data    user data
+     * @param   {array}(optional)   list    list of users we will get out the user object from
+     * @return  {Promise}
+     */
+    delete(data, ...parameters){
+        let instance = data && typeof data === 'object' && data.hasOwnProperty('$delete') ?
+            data : new this.resource(data),
+            list = Array.isArray(parameters[0]) ? parameters[0] : undefined;
+
+        return instance.$delete({id: instance.id}, function(){
+            if(typeof list !== undefined){
+                let index = _lodash.findIndex(list, {id: instance.id});
+                if(index > -1){ instance.splice(index, 1); }
             }
-        }, this.errorHandler);
+        }, this.errorHandler());
     }
 
-    save(data, userList, $form){
-        userList = userList || $form;
-        let instance = new this.resource(data);
+    /**
+     * Saves an item
+     * If data object has an id, it will consider the request as an update,
+     * if id not provided, then it will be a create request
+     * @param   {object}            data    user dtata
+     * @param   {array}(optional)   list    list of users we manipulate after the request
+     * @param   {object}(optional)  $form   angular form we will push error messages into
+     * @return  {Promise}
+     */
+    save(data, ...parameters){
+
+        let list = undefined,
+            $form = undefined,
+            instance = new this.resource(data);
+
+        parameters.forEach(function(param){
+            if(param !== null && typeof param === 'object'){
+                $form = param;
+            }
+            if(param !== null && Array.isArray(param)){
+                list = param;
+            }
+        });
+
         if(instance.id){
-            return instance.$update({id:data.id}, function(result){
-                if(userList){
-                    let index = _lodash.findIndex(userList, {id: instance.id});
-                    if(index > -1){ userList.splice(index, 1, result); }
+            return instance.$update({id:instance.id}, function(result){
+                if(list !== undefined){
+                    let index = _lodash.findIndex(list, {id: instance.id});
+                    if(index > -1){ list.splice(index, 1, result); }
                 }
             }, this.errorHandler($form));
         }else{
             return instance.$save(function(result){
-                if(userList){
-                    userList.push(result);
+                if(list !== undefined){
+                    list.push(result);
                 }
             }, this.errorHandler($form));
         }
     }
 };
 
+/**
+ * User Resource Provider
+ * @return Angular Provider
+ */
 export function PCUserProvider(){
 
     let self = this;

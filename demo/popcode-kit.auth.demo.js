@@ -31,7 +31,14 @@ angular.module('popcode-kit.demo.auth', [
         };
 
         $scope.save = function($form){
-            PCUser.save($scope.user, $scope.users, $form)
+            // PCUser.save($scope.user, $scope.users, $form)
+            //     .then(function(result){
+            //         $scope.user = {};
+            //     })
+            //     .catch(function(response){
+            //         console.log('b', $form);
+            //     });
+            PCUser.save($scope.user, $form)
                 .then(function(result){
                     $scope.user = {};
                 })

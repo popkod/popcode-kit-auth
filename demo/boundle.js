@@ -397,6 +397,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     ;
 
+    /**
+     * User resource class
+     * responsible for user CRUD
+     */
+
     var UserResource = function () {
         function UserResource(_ref2, $resource) {
             var endpoint = _ref2.endpoint,
@@ -409,61 +414,124 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this.resource = $resource(endpoint + '/:id/:controller', paramDefaults, actions);
         }
 
+        /**
+         * Pushes error messages to an angular form
+         * @param   {object}    $form   the reference of the form
+         * @return  {function}
+         */
+
+
         _createClass(UserResource, [{
             key: 'errorHandler',
             value: function errorHandler($form) {
                 return function (response) {
-                    console.error(response);
-                    if ($form) {
+                    if ($form !== undefined && typeof $form.$setPristine == 'function') {
                         if (response.status == 400 && response.data.error) {
-                            Object.keys(response.data.error).forEach(function (key) {
+                            Object.keys($form).forEach(function (key) {
+                                if (/$/.test()) {}
                                 var value = response.data.error[key];
-                                $form[key].$error.error = value;
+                                if ($form[key] && $form[key].$error) $form[key].$error.error = value;
                             });
                         }
                     }
                 };
             }
+
+            /**
+             * Get a lit of users
+             * @param   {object}(optional)  query   additional query
+             * @return  {Promise}
+             */
+
         }, {
             key: 'index',
             value: function index() {
-                return this.resource.index();
+                var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+                return this.resource.index(query);
             }
+
+            /**
+             * Get a user
+             * @param   {object}    query   additional query
+             * @return  {Promise}
+             */
+
         }, {
             key: 'get',
-            value: function get(query) {
+            value: function get() {
+                var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
                 return this.resource.get(query);
             }
+
+            /**
+             * Deletes an item
+             * @param   {object}            data    user data
+             * @param   {array}(optional)   list    list of users we will get out the user object from
+             * @return  {Promise}
+             */
+
         }, {
             key: 'delete',
-            value: function _delete(userInstance, userList) {
-                return userInstance.$delete({ id: userInstance.id }, function () {
-                    if (userList) {
-                        var index = _lodash.findIndex(userList, { id: userInstance.id });
+            value: function _delete(data) {
+                var instance = data && (typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object' && data.hasOwnProperty('$delete') ? data : new this.resource(data),
+                    list = Array.isArray(arguments.length <= 1 ? undefined : arguments[1]) ? arguments.length <= 1 ? undefined : arguments[1] : undefined;
+
+                return instance.$delete({ id: instance.id }, function () {
+                    if ((typeof list === 'undefined' ? 'undefined' : _typeof(list)) !== undefined) {
+                        var index = _lodash.findIndex(list, { id: instance.id });
                         if (index > -1) {
-                            userList.splice(index, 1);
+                            instance.splice(index, 1);
                         }
                     }
-                }, this.errorHandler);
+                }, this.errorHandler());
             }
+
+            /**
+             * Saves an item
+             * If data object has an id, it will consider the request as an update,
+             * if id not provided, then it will be a create request
+             * @param   {object}            data    user dtata
+             * @param   {array}(optional)   list    list of users we manipulate after the request
+             * @param   {object}(optional)  $form   angular form we will push error messages into
+             * @return  {Promise}
+             */
+
         }, {
             key: 'save',
-            value: function save(data, userList, $form) {
-                userList = userList || $form;
-                var instance = new this.resource(data);
+            value: function save(data) {
+
+                var list = undefined,
+                    $form = undefined,
+                    instance = new this.resource(data);
+
+                for (var _len = arguments.length, parameters = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+                    parameters[_key - 1] = arguments[_key];
+                }
+
+                parameters.forEach(function (param) {
+                    if (param !== null && (typeof param === 'undefined' ? 'undefined' : _typeof(param)) === 'object') {
+                        $form = param;
+                    }
+                    if (param !== null && Array.isArray(param)) {
+                        list = param;
+                    }
+                });
+
                 if (instance.id) {
-                    return instance.$update({ id: data.id }, function (result) {
-                        if (userList) {
-                            var index = _lodash.findIndex(userList, { id: instance.id });
+                    return instance.$update({ id: instance.id }, function (result) {
+                        if (list !== undefined) {
+                            var index = _lodash.findIndex(list, { id: instance.id });
                             if (index > -1) {
-                                userList.splice(index, 1, result);
+                                list.splice(index, 1, result);
                             }
                         }
                     }, this.errorHandler($form));
                 } else {
                     return instance.$save(function (result) {
-                        if (userList) {
-                            userList.push(result);
+                        if (list !== undefined) {
+                            list.push(result);
                         }
                     }, this.errorHandler($form));
                 }
@@ -477,6 +545,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     ;
 
+    /**
+     * User Resource Provider
+     * @return Angular Provider
+     */
     function PCUserProvider() {
 
         var self = this;
