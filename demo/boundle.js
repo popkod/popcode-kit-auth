@@ -83,7 +83,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /******/__webpack_require__.p = "";
 
     /******/ // Load entry module and return exports
-    /******/return __webpack_require__(__webpack_require__.s = 5);
+    /******/return __webpack_require__(__webpack_require__.s = 6);
     /******/
 })(
 /************************************************************************/
@@ -94,7 +94,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     "use strict";
     /* harmony export (immutable) */
     __webpack_exports__["a"] = checkModulesLoaded;
-    /* unused harmony export noop */
+    /* harmony export (immutable) */__webpack_exports__["b"] = noop;
 
     function checkModulesLoaded(moduleList) {
         if (typeof angular === 'undefined') {
@@ -118,7 +118,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 /***/function (module, __webpack_exports__, __webpack_require__) {
 
     "use strict";
-    /* unused harmony export PCAuthProvider */
+    /* harmony import */
+    var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(0);
+
+    var Form = function () {
+        function Form() {
+            _classCallCheck(this, Form);
+        }
+
+        _createClass(Form, null, [{
+            key: 'pushValidationMessageToForm',
+
+            /**
+             * Pushes error messages to an angular form
+             * @param   {object}    $form   the reference of the form
+             * @return  {function}
+             */
+            value: function pushValidationMessageToForm($form, reject) {
+                return function (response) {
+                    if ($form !== undefined && typeof $form.$setPristine == 'function') {
+                        if (response.status == 400 && response.data.error) {
+                            $form.general = {
+                                $error: {}
+                            };
+                            if (typeof response.data.error == 'string') {
+                                $form.general.$error.error = Array.isArray(response.data.error) ? response.data.error : [response.data.error];
+                            } else {
+                                Object.keys($form).forEach(function (key) {
+                                    var value = response.data.error[key];
+                                    if ($form[key] && $form[key].$error) $form[key].$error.error = value;
+                                });
+                            }
+                        }
+                    }
+                    (reject || __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */])(response);
+                };
+            }
+        }]);
+
+        return Form;
+    }();
+    /* harmony export (immutable) */
+
+    __webpack_exports__["a"] = Form;
+
+    /***/
+},
+/* 2 */
+/***/function (module, __webpack_exports__, __webpack_require__) {
+
+    "use strict";
+    /* harmony import */
+    var __WEBPACK_IMPORTED_MODULE_0__form__ = __webpack_require__(1);
+    /* harmony export (immutable) */__webpack_exports__["a"] = PCAuthProvider;
 
     var PCUserInstance = void 0;
     var _$http = void 0;
@@ -129,14 +181,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 name = _ref.name,
                 email = _ref.email,
                 role = _ref.role,
-                meta = _ref.meta;
+                meta = _ref.meta,
+                roleObject = _ref.roleObject;
 
             _classCallCheck(this, User);
 
-            this.name = name;
-            this.email = email;
+            this.name = name || '';
+            this.email = email || '';
             this.role = role;
-            this.meta = meta;
+            this.role_object = roleObject || {};
+            this.meta = meta || {};
         }
 
         _createClass(User, [{
@@ -156,7 +210,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var AuthConfig = function AuthConfig() {
         _classCallCheck(this, AuthConfig);
 
-        this.loginUrl = '/api/login';
+        this.endpoint = '/api/login';
     };
     /* unused harmony export AuthConfig */
 
@@ -168,18 +222,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             _classCallCheck(this, Auth);
 
             this.config = config;
-            this.currentUser = new User();
+            this.currentUser = new User({});
         }
 
         _createClass(Auth, [{
+            key: 'errorHandler',
+            value: function errorHandler($form, reject) {
+                return __WEBPACK_IMPORTED_MODULE_0__form__["a" /* default */].pushValidationMessageToForm($form, reject);
+            }
+        }, {
             key: 'login',
-            value: function login(data) {
-                var _this = this;
-
-                return _$http.post(this.config.loginUrl, data).then(function (res) {
-                    _this.currentUser = new User(res);
-                }).catch(function (err) {}).$promise;
+            value: function login(data, $form) {
                 console.log('Auth login');
+                var auth = this;
+                return new Promise(function (resolve, reject) {
+                    return _$http.post(auth.config.endpoint, data).then(function (res) {
+                        console.log('auth login ok', res.data);
+                        auth.currentUser = new User(res.data);
+                        return resolve(auth.currentUser);
+                    }).catch(auth.errorHandler($form, reject));
+                });
             }
         }, {
             key: 'logout',
@@ -224,7 +286,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         console.log('Initiating Auth service');
 
         self.$get = function (PCUser, $http) {
-            pCUser = PCUser;
+            PCUserInstance = PCUser;
             _$http = $http;
             return new Auth(self.config, PCUser);
         };
@@ -232,7 +294,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     /***/
 },
-/* 2 */
+/* 3 */
 /***/function (module, __webpack_exports__, __webpack_require__) {
 
     "use strict";
@@ -316,7 +378,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     /***/
 },
-/* 3 */
+/* 4 */
 /***/function (module, __webpack_exports__, __webpack_require__) {
 
     "use strict";
@@ -359,12 +421,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     /***/
 },
-/* 4 */
+/* 5 */
 /***/function (module, __webpack_exports__, __webpack_require__) {
 
     "use strict";
-    /* harmony export (immutable) */
-    __webpack_exports__["a"] = PCUserProvider;
+    /* harmony import */
+    var __WEBPACK_IMPORTED_MODULE_0__form__ = __webpack_require__(1);
+    /* harmony export (immutable) */__webpack_exports__["a"] = PCUserProvider;
 
     var resourceProvider = void 0;
     var _lodash = void 0;
@@ -424,17 +487,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _createClass(UserResource, [{
             key: 'errorHandler',
             value: function errorHandler($form) {
-                return function (response) {
-                    if ($form !== undefined && typeof $form.$setPristine == 'function') {
-                        if (response.status == 400 && response.data.error) {
-                            Object.keys($form).forEach(function (key) {
-                                if (/$/.test()) {}
-                                var value = response.data.error[key];
-                                if ($form[key] && $form[key].$error) $form[key].$error.error = value;
-                            });
-                        }
-                    }
-                };
+                return __WEBPACK_IMPORTED_MODULE_0__form__["a" /* default */].pushValidationMessageToForm($form);
             }
 
             /**
@@ -563,17 +616,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     /***/
 },
-/* 5 */
+/* 6 */
 /***/function (module, __webpack_exports__, __webpack_require__) {
 
     "use strict";
 
     Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     /* harmony import */var __WEBPACK_IMPORTED_MODULE_0__src_utils__ = __webpack_require__(0);
-    /* harmony import */var __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__ = __webpack_require__(1);
-    /* harmony import */var __WEBPACK_IMPORTED_MODULE_2__src_interceptor_provider__ = __webpack_require__(2);
-    /* harmony import */var __WEBPACK_IMPORTED_MODULE_3__src_user_provider__ = __webpack_require__(4);
-    /* harmony import */var __WEBPACK_IMPORTED_MODULE_4__src_router_decorator__ = __webpack_require__(3);
+    /* harmony import */var __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__ = __webpack_require__(2);
+    /* harmony import */var __WEBPACK_IMPORTED_MODULE_2__src_interceptor_provider__ = __webpack_require__(3);
+    /* harmony import */var __WEBPACK_IMPORTED_MODULE_3__src_user_provider__ = __webpack_require__(5);
+    /* harmony import */var __WEBPACK_IMPORTED_MODULE_4__src_router_decorator__ = __webpack_require__(4);
 
     var MODULE_NAME = 'popcode-kit.auth';
     var dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash'];
@@ -587,8 +640,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     angular.module(MODULE_NAME, dependencies)
     // .provider('PCAuthInterceptor', PCAuthInterceptorProvider)
     // .run(routerDecorator)
-    // .provider('PCAuth', PCAuthProvider)
-    .provider('PCUser', __WEBPACK_IMPORTED_MODULE_3__src_user_provider__["a" /* PCUserProvider */])
+    .provider('PCAuth', __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__["a" /* PCAuthProvider */]).provider('PCUser', __WEBPACK_IMPORTED_MODULE_3__src_user_provider__["a" /* PCUserProvider */])
     // .config(['$httpProvider', addInterceptor])
     .name;
 

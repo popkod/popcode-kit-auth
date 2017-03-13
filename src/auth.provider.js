@@ -1,15 +1,18 @@
 'use strict';
 
+import From from './form';
+
 let PCUserInstance;
 let _$http;
 
 export class User{
 
-    constructor({id, name, email, role, meta}){
-        this.name = name;
-        this.email = email;
+    constructor({id, name, email, role, meta, roleObject}){
+        this.name = name || '';
+        this.email = email || '';
         this.role = role;
-        this.meta = meta;
+        this.role_object = roleObject || {};
+        this.meta = meta || {};
     };
 
     hasRole(role){
@@ -19,7 +22,7 @@ export class User{
 
 export class AuthConfig{
     constructor(){
-        this.loginUrl = '/api/login';
+        this.endpoint = '/api/login';
     }
 };
 
@@ -27,20 +30,28 @@ export class Auth{
 
     constructor(config){
         this.config = config;
-        this.currentUser = new User();
+        this.currentUser = new User({});
     };
 
-    login(data){
-        return _$http
-            .post(this.config.loginUrl, data)
-            .then(res => {
-                this.currentUser = new User(res);
-            })
-            .catch(err => {
+    errorHandler($form, reject){
+        return From.pushValidationMessageToForm($form, reject);
+    }
 
-            })
-            .$promise;
+    login(data, $form){
         console.log('Auth login');
+        let auth = this;
+        return new Promise(function(resolve, reject){
+            return _$http
+                .post(auth.config.endpoint, data)
+                .then(res => {
+                    console.log('auth login ok', res.data);
+                    auth.currentUser = new User(res.data);
+                    return resolve(auth.currentUser);
+                })
+                .catch(auth.errorHandler($form, reject))
+                ;
+        });
+
     }
 
     logout(){
@@ -74,7 +85,7 @@ export function PCAuthProvider(){
     console.log('Initiating Auth service');
 
      self.$get = function(PCUser, $http){
-         pCUser = PCUser;
+         PCUserInstance = PCUser;
          _$http = $http;
          return new Auth(self.config, PCUser);
      };

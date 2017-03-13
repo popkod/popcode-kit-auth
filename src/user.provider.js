@@ -1,5 +1,7 @@
 'use strict';
 
+import Form from './form';
+
 let resourceProvider;
 let _lodash;
 
@@ -43,20 +45,7 @@ export class UserResource{
      * @return  {function}
      */
     errorHandler($form){
-        return function(response){
-            if($form !== undefined && typeof $form.$setPristine == 'function'){
-                if(response.status == 400 && response.data.error){
-                    Object.keys($form).forEach(function(key){
-                        if(/$/.test()){
-
-                        }
-                        let value = response.data.error[key];
-                        if($form[key] && $form[key].$error)
-                            $form[key].$error.error = value;
-                    });
-                }
-            }
-        }
+        return Form.pushValidationMessageToForm($form);
     }
 
     /**

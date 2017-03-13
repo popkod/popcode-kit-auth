@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -72,7 +72,7 @@
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = checkModulesLoaded;
-/* unused harmony export noop */
+/* harmony export (immutable) */ __webpack_exports__["b"] = noop;
 
 
 function checkModulesLoaded(moduleList){
@@ -97,7 +97,52 @@ function noop(){};
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export PCAuthProvider */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(0);
+
+
+class Form{
+    /**
+     * Pushes error messages to an angular form
+     * @param   {object}    $form   the reference of the form
+     * @return  {function}
+     */
+    static pushValidationMessageToForm($form, reject){
+        return function(response){
+            if($form !== undefined && typeof $form.$setPristine == 'function'){
+                if(response.status == 400 && response.data.error){
+                    $form.general = {
+                        $error : {}
+                    };
+                    if(typeof response.data.error == 'string'){
+                        $form.general.$error.error =
+                            Array.isArray(response.data.error) ?
+                            response.data.error : [response.data.error];
+                    }else{
+                        Object.keys($form).forEach(function(key){
+                            let value = response.data.error[key];
+                            if($form[key] && $form[key].$error)
+                            $form[key].$error.error = value;
+                        });
+                    }
+                }
+            }
+            (reject || __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */])(response);
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Form;
+
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__form__ = __webpack_require__(1);
+/* harmony export (immutable) */ __webpack_exports__["a"] = PCAuthProvider;
+
+
 
 
 let PCUserInstance;
@@ -105,11 +150,12 @@ let _$http;
 
 class User{
 
-    constructor({id, name, email, role, meta}){
-        this.name = name;
-        this.email = email;
+    constructor({id, name, email, role, meta, roleObject}){
+        this.name = name || '';
+        this.email = email || '';
         this.role = role;
-        this.meta = meta;
+        this.role_object = roleObject || {};
+        this.meta = meta || {};
     };
 
     hasRole(role){
@@ -121,7 +167,7 @@ class User{
 
 class AuthConfig{
     constructor(){
-        this.loginUrl = '/api/login';
+        this.endpoint = '/api/login';
     }
 }
 /* unused harmony export AuthConfig */
@@ -131,20 +177,28 @@ class Auth{
 
     constructor(config){
         this.config = config;
-        this.currentUser = new User();
+        this.currentUser = new User({});
     };
 
-    login(data){
-        return _$http
-            .post(this.config.loginUrl, data)
-            .then(res => {
-                this.currentUser = new User(res);
-            })
-            .catch(err => {
+    errorHandler($form, reject){
+        return __WEBPACK_IMPORTED_MODULE_0__form__["a" /* default */].pushValidationMessageToForm($form, reject);
+    }
 
-            })
-            .$promise;
+    login(data, $form){
         console.log('Auth login');
+        let auth = this;
+        return new Promise(function(resolve, reject){
+            return _$http
+                .post(auth.config.endpoint, data)
+                .then(res => {
+                    console.log('auth login ok', res.data);
+                    auth.currentUser = new User(res.data);
+                    return resolve(auth.currentUser);
+                })
+                .catch(auth.errorHandler($form, reject))
+                ;
+        });
+
     }
 
     logout(){
@@ -180,7 +234,7 @@ function PCAuthProvider(){
     console.log('Initiating Auth service');
 
      self.$get = function(PCUser, $http){
-         pCUser = PCUser;
+         PCUserInstance = PCUser;
          _$http = $http;
          return new Auth(self.config, PCUser);
      };
@@ -188,7 +242,7 @@ function PCAuthProvider(){
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -267,7 +321,7 @@ function PCAuthInterceptorProvider(){
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -317,11 +371,14 @@ function routerDecorator($rootScope, $state, PCAuth){
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__form__ = __webpack_require__(1);
 /* harmony export (immutable) */ __webpack_exports__["a"] = PCUserProvider;
+
+
 
 
 let resourceProvider;
@@ -369,20 +426,7 @@ class UserResource{
      * @return  {function}
      */
     errorHandler($form){
-        return function(response){
-            if($form !== undefined && typeof $form.$setPristine == 'function'){
-                if(response.status == 400 && response.data.error){
-                    Object.keys($form).forEach(function(key){
-                        if(/$/.test()){
-
-                        }
-                        let value = response.data.error[key];
-                        if($form[key] && $form[key].$error)
-                            $form[key].$error.error = value;
-                    });
-                }
-            }
-        }
+        return __WEBPACK_IMPORTED_MODULE_0__form__["a" /* default */].pushValidationMessageToForm($form);
     }
 
     /**
@@ -485,16 +529,16 @@ function PCUserProvider(){
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_utils__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interceptor_provider__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_user_provider__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_router_decorator__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interceptor_provider__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_user_provider__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_router_decorator__ = __webpack_require__(4);
 
 
 
@@ -515,7 +559,7 @@ function addInterceptor($httpProvider) {
 angular.module(MODULE_NAME, dependencies)
     // .provider('PCAuthInterceptor', PCAuthInterceptorProvider)
     // .run(routerDecorator)
-    // .provider('PCAuth', PCAuthProvider)
+    .provider('PCAuth', __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__["a" /* PCAuthProvider */])
     .provider('PCUser', __WEBPACK_IMPORTED_MODULE_3__src_user_provider__["a" /* PCUserProvider */])
     // .config(['$httpProvider', addInterceptor])
     .name

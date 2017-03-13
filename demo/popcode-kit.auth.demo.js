@@ -52,11 +52,23 @@ angular.module('popcode-kit.demo.auth', [
         };
 
     })
-    .config(function(PCUserProvider,
+    .controller('LoginCtrl', function($scope, PCAuth){
+        $scope.login = function($form){
+            PCAuth.login($scope.user, $form)
+                .then(function(data){
+                    console.log('user logged in', data);
+                })
+                .catch(function(response){
+                    console.log('Failed to login', response);
+                });
+        };
+    })
+    .config(function(PCUserProvider, PCAuthProvider,
         $stateProvider, $urlRouterProvider,
         $locationProvider, Settings){
 
         PCUserProvider.config.endpoint = Settings.apiUrl+'users';
+        PCAuthProvider.config.endpoint = Settings.apiUrl+'login';
 
         $urlRouterProvider
             .otherwise('/');
@@ -67,10 +79,15 @@ angular.module('popcode-kit.demo.auth', [
             });
 
         $stateProvider
+            // .state('main', {
+            //     url: '/',
+            //     templateUrl: '/main.html',
+            //     controller: 'MainCtrl'
+            // })
             .state('main', {
                 url: '/',
-                templateUrl: '/main.html',
-                controller: 'MainCtrl'
+                templateUrl: '/login.html',
+                controller: 'LoginCtrl'
             });
     })
 ;
