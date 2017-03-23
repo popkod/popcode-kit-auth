@@ -495,7 +495,7 @@ function stateChangeHandler(event, nextState){
             return handleConfigError(nextState.name, nextState.restrict);
         }
         allowedRoles.push(Number(nextState.restrict));
-    } else if(typeof nextState.restrict === 'Array'){
+    } else if(Array.isArray(nextState.restrict)){
         allowedRoles = nextState.restrict;
     }else{
         return handleConfigError(nextState.name, nextState.restrict);

@@ -143,7 +143,7 @@ angular.module('popcode-kit.demo.auth', [
                 url: '/route1',
                 templateUrl: '/route1.html',
                 controller: 'route1',
-                restrict: 1
+                restrict: [2,3,4]
             })
             .state('login', {
                 url: '/login',
