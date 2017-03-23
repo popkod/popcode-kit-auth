@@ -555,7 +555,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * If the array contains the user's role, or the given number equals to
      * it, then it makes the element visible, otherwise hidden.
      */
-    function RoleRestricterLink($scope, element, attrs) {
+    function RoleRestricterLink($scope, element, attrs, controller, transclude) {
+
+        transclude($scope, function (clone) {
+            element.append(clone);
+        });
 
         var me = void 0,
             watcher = __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */],
@@ -589,7 +593,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             scope: {
                 restrict: '&pcRoleRestrict'
             },
-            template: '<div ng-transclude></div>',
             link: RoleRestricterLink
         };
     };

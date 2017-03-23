@@ -497,7 +497,12 @@ function hide(element){
  * If the array contains the user's role, or the given number equals to
  * it, then it makes the element visible, otherwise hidden.
  */
-function RoleRestricterLink($scope, element, attrs) {
+function RoleRestricterLink($scope, element, attrs, controller,
+        transclude) {
+
+    transclude($scope, function (clone) {
+        element.append(clone);
+    });
 
     let
         me,
@@ -534,7 +539,6 @@ function roleRestrictConfig(PCAuth, $parse) {
         scope: {
             restrict: '&pcRoleRestrict'
         },
-        template: '<div ng-transclude></div>',
         link: RoleRestricterLink
     };
 };
