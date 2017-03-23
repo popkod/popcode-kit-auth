@@ -2,7 +2,10 @@
 
 import {noop} from './utils';
 
-var _config, _$injector;
+var _config,
+    _$injector,
+    _$cookies
+    ;
 
 export class responseErrorHandlers{
 
@@ -43,13 +46,16 @@ export class AuthInterceptor{
 
     request(config){
         console.log('AuthInterceptor', 'request');
+        config.headers = config.headers || {};
+        if(_$cookies.get('token')) {
+            console.log(`Bearer ${_$cookies.get('token')}`);
+            config.headers.Authorization = `Bearer ${_$cookies.get('token')}`;
+        }
         return config;
     };
 
     responseError(response){
-        console.log('AuthInterceptor', 'responseError');
-        let $state = _$injector.get('$state');
-        console.log('$state', $state);
+        console.error('AuthInterceptor', 'responseError', response);
         let handler = _config.responseErrorHandlers[response.status] || noop;
         handler(response.data, _$injector);
         return response;
@@ -63,8 +69,9 @@ export function PCAuthInterceptorProvider(){
 
     self.config = new InterceptorConfig();
 
-    self.$get = function($injector){
+    self.$get = function($injector, $cookies){
         _$injector = $injector;
+        _$cookies = $cookies;
         return new AuthInterceptor(self.config );
     };
 

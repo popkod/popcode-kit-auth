@@ -177,7 +177,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _$http = void 0,
         _$timeout = void 0,
         _lodash = void 0,
-        _$q = void 0;
+        _$q = void 0,
+        _$cookies = void 0;
 
     var User = function () {
         function User(_ref) {
@@ -186,7 +187,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 email = _ref.email,
                 role = _ref.role,
                 meta = _ref.meta,
-                roleObject = _ref.roleObject;
+                roleObject = _ref.roleObject,
+                token = _ref.token;
 
             _classCallCheck(this, User);
 
@@ -195,6 +197,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this.role = role;
             this.role_object = roleObject || {};
             this.meta = meta || {};
+            this.token = token;
         }
 
         _createClass(User, [{
@@ -280,33 +283,39 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: '_getMe',
             value: function _getMe() {
                 // For test only
-                function _meMock() {
-                    return _$q(function (resolve) {
-                        _$timeout(function () {
-                            resolve({
-                                name: 'Test User',
-                                email: 'test@popcode.hu',
-                                role: 1,
-                                role_object: {
-                                    label: 'user',
-                                    title: 'Simple User',
-                                    id: 1
-                                }
-                            });
-                        }, 700);
-                    });
-                }
+                // function _meMock(){
+                //     return _$q(function(resolve){
+                //         _$timeout(function(){
+                //             resolve({
+                //                 name: 'Test User',
+                //                 email: 'test@popcode.hu',
+                //                 role: 1,
+                //                 role_object: {
+                //                     label: 'user',
+                //                     title: 'Simple User',
+                //                     id: 1
+                //                 }
+                //             });
+                //         }, 700);
+                //     });
+                // }
 
                 // Actual request goes here:
                 var _auth = this;
                 return _$q(function (resolve, reject) {
-                    // _PCUser.me().$promise
-                    _meMock().then(function (response) {
-                        _auth._me = new User(response);
+                    if (_$cookies.get('token')) {
+                        _PCUser.me().$promise
+                        // _meMock()
+                        .then(function (response) {
+                            _auth._me = new User(response);
+                            resolve(_auth._me);
+                        }).catch(function (response) {
+                            resolve({});
+                        });
+                    } else {
+                        _auth._me = new User({});
                         resolve(_auth._me);
-                    }).catch(function (response) {
-                        resolve({});
-                    });
+                    }
                 });
             }
 
@@ -326,6 +335,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return new Promise(function (resolve, reject) {
                     return _$http.post(auth.config.endpoint + 'login', data).then(function (res) {
                         console.log('auth login ok', res.data);
+                        _$cookies.put('token', res.data.token);
                         auth._me = new User(res.data);
                         return resolve(auth._me);
                     }).catch(auth.errorHandler($form, reject));
@@ -340,10 +350,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: 'logout',
             value: function logout() {
-                var _auth = this;
+                var auth = this;
                 return new Promise(function (resolve, reject) {
-                    _http.get(auth.config.endpoint + 'logout').then(function (response) {
-                        _auth._me = {};
+                    _$http.get(auth.config.endpoint + 'logout').then(function (response) {
+                        _$cookies.remove('token');
+                        auth._me = new User({});
                         resolve(response);
                     }).catch(function (response) {
                         reject(response);
@@ -400,12 +411,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         self.config = new AuthConfig();
 
-        self.$get = function (PCUser, $http, $timeout, $q, lodash) {
+        self.$get = function (PCUser, $http, $timeout, $q, lodash, $cookies) {
             _PCUser = PCUser;
             _$http = $http;
             _$timeout = $timeout;
             _$q = $q;
             _lodash = lodash;
+            _$cookies = $cookies;
             return new Auth(self.config, PCUser);
         };
     };
@@ -420,7 +432,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(0);
     /* harmony export (immutable) */__webpack_exports__["a"] = PCAuthInterceptorProvider;
 
-    var _config, _$injector;
+    var _config, _$injector, _$cookies;
 
     var responseErrorHandlers = function responseErrorHandlers() {
         _classCallCheck(this, responseErrorHandlers);
@@ -468,14 +480,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: 'request',
             value: function request(config) {
                 console.log('AuthInterceptor', 'request');
+                config.headers = config.headers || {};
+                if (_$cookies.get('token')) {
+                    console.log('Bearer ' + _$cookies.get('token'));
+                    config.headers.Authorization = 'Bearer ' + _$cookies.get('token');
+                }
                 return config;
             }
         }, {
             key: 'responseError',
             value: function responseError(response) {
-                console.log('AuthInterceptor', 'responseError');
-                var $state = _$injector.get('$state');
-                console.log('$state', $state);
+                console.error('AuthInterceptor', 'responseError', response);
                 var handler = _config.responseErrorHandlers[response.status] || __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */];
                 handler(response.data, _$injector);
                 return response;
@@ -495,8 +510,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         self.config = new InterceptorConfig();
 
-        self.$get = function ($injector) {
+        self.$get = function ($injector, $cookies) {
             _$injector = $injector;
+            _$cookies = $cookies;
             return new AuthInterceptor(self.config);
         };
     };

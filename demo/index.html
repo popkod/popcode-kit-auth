@@ -24,6 +24,24 @@
         <script src="./popcode-kit.auth.demo.js" charset="utf-8"></script>
     </head>
     <body ng-app="popcode-kit.demo.auth">
+        <div class="container" ng-controller="HeaderCtrl">
+            <div class="col-sm-12">
+                <ul>
+                    <li>
+                        <a ui-sref="main">Main</a>
+                    </li>
+                    <li>
+                        <a ui-sref="route1">route1</a>
+                    </li>
+                    <li>
+                        <a ui-sref="login">login</a>
+                    </li>
+                    <li>
+                        <a ng-click="logout()">logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
         <div ui-view=""></div>
     </body>
 </html>

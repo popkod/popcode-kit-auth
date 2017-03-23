@@ -1,18 +1,4 @@
 <div class="container">
-    <ul>
-        <li>
-            <a ui-sref="main">Main</a>
-        </li>
-        <li>
-            <a ui-sref="route1">route1</a>
-        </li>
-    </ul>
-    <button
-        class="btn btn-default"
-        ng-click="login()">
-        Login
-    </button>
-
     <div class="row">
         <div class="col-sm-3" ng-repeat="(roleKey, roleId) in roles track by $index">
             <p>{{roleKey}} : {{roleId}}</p>

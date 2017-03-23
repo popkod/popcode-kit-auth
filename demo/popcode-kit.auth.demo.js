@@ -8,6 +8,15 @@ angular.module('popcode-kit.demo.auth', [
     .constant('Settings', {
         apiUrl: 'http://192.168.200.211/api/'
     })
+    .controller('HeaderCtrl', function($scope, $state, PCAuth){
+        $scope.logout = function(){
+            PCAuth.logout()
+                .then(function(){
+                    alert('Logout success.');
+                    $state.go('login');
+                });
+        };
+    })
     .controller('MainCtrl', function($scope, PCUser, $resource, Settings, $q, $uibModal){
         $scope.users = PCUser.index();
 
@@ -65,11 +74,15 @@ angular.module('popcode-kit.demo.auth', [
             PCAuth.login($scope.user, $form)
                 .then(function(data){
                     console.log('current user', PCAuth.me);
+                    $state.go('main');
                 })
                 .catch(function(response){
                     console.log('Failed to login', response);
                 });
         };
+    })
+    .controller('route1', function($scope){
+
     })
     // .provider('httpHandlers', function TestProvider(){
     //     var _state;
@@ -105,7 +118,7 @@ angular.module('popcode-kit.demo.auth', [
             // (state || (state = $injector.get('$state')))
             $state
             // $stateProvider
-                .go('login');
+                .transitionTo('login');
 
         };
         PCAuthInterceptorProvider.config.responseErrorHandlers[403] = function(response){
@@ -128,8 +141,8 @@ angular.module('popcode-kit.demo.auth', [
             })
             .state('route1', {
                 url: '/route1',
-                templateUrl: '/main.html',
-                controller: 'MainCtrl',
+                templateUrl: '/route1.html',
+                controller: 'route1',
                 restrict: 1
             })
             .state('login', {

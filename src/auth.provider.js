@@ -7,17 +7,19 @@ let _PCUser,
     _$http,
     _$timeout,
     _lodash,
-    _$q
+    _$q,
+    _$cookies
     ;
 
 export class User{
 
-    constructor({id, name, email, role, meta, roleObject}){
+    constructor({id, name, email, role, meta, roleObject, token}){
         this.name = name || '';
         this.email = email || '';
         this.role = role;
         this.role_object = roleObject || {};
         this.meta = meta || {};
+        this.token = token;
     };
 
     /**
@@ -78,35 +80,41 @@ export class Auth{
      */
     _getMe(){
         // For test only
-        function _meMock(){
-            return _$q(function(resolve){
-                _$timeout(function(){
-                    resolve({
-                        name: 'Test User',
-                        email: 'test@popcode.hu',
-                        role: 1,
-                        role_object: {
-                            label: 'user',
-                            title: 'Simple User',
-                            id: 1
-                        }
-                    });
-                }, 700);
-            });
-        }
+        // function _meMock(){
+        //     return _$q(function(resolve){
+        //         _$timeout(function(){
+        //             resolve({
+        //                 name: 'Test User',
+        //                 email: 'test@popcode.hu',
+        //                 role: 1,
+        //                 role_object: {
+        //                     label: 'user',
+        //                     title: 'Simple User',
+        //                     id: 1
+        //                 }
+        //             });
+        //         }, 700);
+        //     });
+        // }
 
         // Actual request goes here:
         let _auth = this;
         return _$q(function(resolve, reject){
-            // _PCUser.me().$promise
-                _meMock()
-                .then(function(response){
-                    _auth._me = new User(response);
-                    resolve(_auth._me);
-                })
-                .catch(function(response){
-                    resolve({});
-                });
+            if(_$cookies.get('token')){
+                _PCUser.me().$promise
+                    // _meMock()
+                    .then(function(response){
+                        _auth._me = new User(response);
+                        resolve(_auth._me);
+                    })
+                    .catch(function(response){
+                        resolve({});
+                    });
+
+            }else{
+                _auth._me = new User({});
+                resolve(_auth._me);
+            }
         });
     }
 
@@ -125,6 +133,7 @@ export class Auth{
                 .post(`${auth.config.endpoint}login`, data)
                 .then(res => {
                     console.log('auth login ok', res.data);
+                    _$cookies.put('token', res.data.token);
                     auth._me = new User(res.data);
                     return resolve(auth._me);
                 })
@@ -139,11 +148,12 @@ export class Auth{
      * @return {Promise}
      */
     logout(){
-        let _auth = this;
+        let auth = this;
         return new Promise(function(resolve, reject){
-            _http.get(`${auth.config.endpoint}logout`)
+            _$http.get(`${auth.config.endpoint}logout`)
             .then(response => {
-                _auth._me = {};
+                _$cookies.remove('token');
+                auth._me = new User({});
                 resolve(response);
             })
             .catch(response => {
@@ -191,12 +201,13 @@ export function PCAuthProvider(){
 
     self.config = new AuthConfig();
 
-    self.$get = function(PCUser, $http, $timeout, $q, lodash){
+    self.$get = function(PCUser, $http, $timeout, $q, lodash, $cookies){
          _PCUser = PCUser;
          _$http = $http;
          _$timeout = $timeout;
          _$q = $q;
          _lodash = lodash;
+         _$cookies = $cookies;
          return new Auth(self.config, PCUser);
      };
 };
