@@ -332,7 +332,8 @@ class Auth{
     }
 
     hasRole(roles){
-        return this._me
+        let value = _lodash.get(this._me, '$promise') ? this._me.$promise : this._me;
+        return _$q.when(value)
             .then(me => {
                 return me.hasRole(roles);
             })

@@ -375,7 +375,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: 'hasRole',
             value: function hasRole(roles) {
-                return this._me.then(function (me) {
+                var value = _lodash.get(this._me, '$promise') ? this._me.$promise : this._me;
+                return _$q.when(value).then(function (me) {
                     return me.hasRole(roles);
                 });
             }
