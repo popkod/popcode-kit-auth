@@ -274,13 +274,13 @@ class Auth{
      * @return  {Promise}
      */
     login(data, $form){
-        console.log('Auth login');
+        //console.log('Auth login');
         let auth = this;
         return new Promise(function(resolve, reject){
             return _$http
                 .post(`${auth.config.endpoint}login`, data)
                 .then(res => {
-                    console.log('auth login ok', res.data);
+                    //console.log('auth login ok', res.data);
                     _$cookies.put('token', res.data.token);
                     auth._me = new User(res.data);
                     return resolve(auth._me);
@@ -328,7 +328,7 @@ class Auth{
     set me(me) {};
 
     getToken(){
-        console.log('get token');
+        //console.log('get token');
     }
 
     hasRole(roles){
@@ -416,15 +416,15 @@ class InterceptorConfig{
 class AuthInterceptor{
 
     constructor(config){
-        console.log('Initiating AuthInterceptor', this);
+        //console.log('Initiating AuthInterceptor', this);
         _config = config;
     };
 
     request(config){
-        console.log('AuthInterceptor', 'request');
+        //console.log('AuthInterceptor', 'request');
         config.headers = config.headers || {};
         if(_$cookies.get('token')) {
-            console.log(`Bearer ${_$cookies.get('token')}`);
+            //console.log(`Bearer ${_$cookies.get('token')}`);
             config.headers.Authorization = `Bearer ${_$cookies.get('token')}`;
         }
         return config;
@@ -478,13 +478,13 @@ function handleConfigError(stateName, role){
 
 function stateChangeHandler(event, nextState){
 
-    console.log('routerDecorator', nextState);
+    //console.log('routerDecorator', nextState);
     if(!nextState.restrict){
-        console.log('routerDecorator no need to check role');
+        //console.log('routerDecorator no need to check role');
         return;
     }
 
-    console.log('routerDecorator need to check role');
+    //console.log('routerDecorator need to check role');
 
     let allowedRoles = [];
 
@@ -505,10 +505,10 @@ function stateChangeHandler(event, nextState){
     return hasRole
         .then(has =>{
             if(has){
-                console.log('routerDecorator has role');
+                //console.log('routerDecorator has role');
                 return;
             }
-            console.log('routerDecorator has no role');
+            //console.log('routerDecorator has no role');
 
             event.preventDefault();
         });

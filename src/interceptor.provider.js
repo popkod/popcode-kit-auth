@@ -40,15 +40,15 @@ export class InterceptorConfig{
 export class AuthInterceptor{
 
     constructor(config){
-        console.log('Initiating AuthInterceptor', this);
+        //console.log('Initiating AuthInterceptor', this);
         _config = config;
     };
 
     request(config){
-        console.log('AuthInterceptor', 'request');
+        //console.log('AuthInterceptor', 'request');
         config.headers = config.headers || {};
         if(_$cookies.get('token')) {
-            console.log(`Bearer ${_$cookies.get('token')}`);
+            //console.log(`Bearer ${_$cookies.get('token')}`);
             config.headers.Authorization = `Bearer ${_$cookies.get('token')}`;
         }
         return config;

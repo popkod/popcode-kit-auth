@@ -13,13 +13,13 @@ function handleConfigError(stateName, role){
 
 export function stateChangeHandler(event, nextState){
 
-    console.log('routerDecorator', nextState);
+    //console.log('routerDecorator', nextState);
     if(!nextState.restrict){
-        console.log('routerDecorator no need to check role');
+        //console.log('routerDecorator no need to check role');
         return;
     }
 
-    console.log('routerDecorator need to check role');
+    //console.log('routerDecorator need to check role');
 
     let allowedRoles = [];
 
@@ -40,10 +40,10 @@ export function stateChangeHandler(event, nextState){
     return hasRole
         .then(has =>{
             if(has){
-                console.log('routerDecorator has role');
+                //console.log('routerDecorator has role');
                 return;
             }
-            console.log('routerDecorator has no role');
+            //console.log('routerDecorator has no role');
 
             event.preventDefault();
         });

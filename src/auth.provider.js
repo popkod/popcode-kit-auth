@@ -126,13 +126,13 @@ export class Auth{
      * @return  {Promise}
      */
     login(data, $form){
-        console.log('Auth login');
+        //console.log('Auth login');
         let auth = this;
         return new Promise(function(resolve, reject){
             return _$http
                 .post(`${auth.config.endpoint}login`, data)
                 .then(res => {
-                    console.log('auth login ok', res.data);
+                    //console.log('auth login ok', res.data);
                     _$cookies.put('token', res.data.token);
                     auth._me = new User(res.data);
                     return resolve(auth._me);
@@ -180,7 +180,7 @@ export class Auth{
     set me(me) {};
 
     getToken(){
-        console.log('get token');
+        //console.log('get token');
     }
 
     hasRole(roles){
