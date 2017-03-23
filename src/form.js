@@ -26,7 +26,7 @@ export default class Form{
                     }
                 }
             }
-            (reject || noop)(response);
+            return (reject || noop)(response);
         }
     }
 }

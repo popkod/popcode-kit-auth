@@ -79,30 +79,11 @@ export class Auth{
      * @return {Promise}    User object
      */
     _getMe(){
-        // For test only
-        // function _meMock(){
-        //     return _$q(function(resolve){
-        //         _$timeout(function(){
-        //             resolve({
-        //                 name: 'Test User',
-        //                 email: 'test@popcode.hu',
-        //                 role: 1,
-        //                 role_object: {
-        //                     label: 'user',
-        //                     title: 'Simple User',
-        //                     id: 1
-        //                 }
-        //             });
-        //         }, 700);
-        //     });
-        // }
-
         // Actual request goes here:
         let _auth = this;
         return _$q(function(resolve, reject){
             if(_$cookies.get('token')){
                 _PCUser.me().$promise
-                    // _meMock()
                     .then(function(response){
                         _auth._me = new User(response);
                         resolve(_auth._me);
@@ -132,10 +113,14 @@ export class Auth{
             return _$http
                 .post(`${auth.config.endpoint}login`, data)
                 .then(res => {
-                    //console.log('auth login ok', res.data);
-                    _$cookies.put('token', res.data.token);
-                    auth._me = new User(res.data);
-                    return resolve(auth._me);
+                    if(res.status === 200){
+                        // console.log('auth login ok', res);
+                        _$cookies.put('token', res.data.token);
+                        auth._me = new User(res.data);
+                        return resolve(auth._me);
+                    }else{
+                        return auth.errorHandler($form, reject)(res);
+                    }
                 })
                 .catch(auth.errorHandler($form, reject))
                 ;
