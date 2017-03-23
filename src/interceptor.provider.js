@@ -2,6 +2,8 @@
 
 import {noop} from './utils';
 
+var _config, _$injector;
+
 export class responseErrorHandlers{
 
     constructor(){
@@ -27,7 +29,7 @@ export class responseErrorHandlers{
 export class InterceptorConfig{
 
     constructor(){
-        this.responseErrorHandlers = new responseErrorHandlers;
+        this.responseErrorHandlers = new responseErrorHandlers();
     };
 
 };
@@ -35,18 +37,22 @@ export class InterceptorConfig{
 export class AuthInterceptor{
 
     constructor(config){
-        this.config = config;
+        console.log('Initiating AuthInterceptor', this);
+        _config = config;
     };
 
     request(config){
+        console.log('AuthInterceptor', 'request');
         return config;
     };
 
-    requestError(response){
-        var handler = this.config.responseErrorHandlers[response.status];
-        if(typeof handler === 'function'){
-            handler(response.data);
-        }
+    responseError(response){
+        console.log('AuthInterceptor', 'responseError');
+        let $state = _$injector.get('$state');
+        console.log('$state', $state);
+        let handler = _config.responseErrorHandlers[response.status] || noop;
+        handler(response.data, _$injector);
+        return response;
     };
 
 };
@@ -57,7 +63,8 @@ export function PCAuthInterceptorProvider(){
 
     self.config = new InterceptorConfig();
 
-    self.$get = function(){
+    self.$get = function($injector){
+        _$injector = $injector;
         return new AuthInterceptor(self.config );
     };
 

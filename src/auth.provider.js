@@ -1,6 +1,7 @@
 'use strict';
 
 import From from './form';
+import {noop} from './utils';
 
 let _PCUser,
     _$http,
@@ -170,6 +171,13 @@ export class Auth{
 
     getToken(){
         console.log('get token');
+    }
+
+    hasRole(roles){
+        return this._me
+            .then(me => {
+                return me.hasRole(roles);
+            })
     }
 
 };

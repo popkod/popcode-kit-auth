@@ -140,7 +140,9 @@ class Form{
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__form__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils__ = __webpack_require__(0);
 /* harmony export (immutable) */ __webpack_exports__["a"] = PCAuthProvider;
+
 
 
 
@@ -319,6 +321,13 @@ class Auth{
         console.log('get token');
     }
 
+    hasRole(roles){
+        return this._me
+            .then(me => {
+                return me.hasRole(roles);
+            })
+    }
+
 }
 /* unused harmony export Auth */
 ;
@@ -349,10 +358,12 @@ function PCAuthProvider(){
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(0);
-/* unused harmony export PCAuthInterceptorProvider */
+/* harmony export (immutable) */ __webpack_exports__["a"] = PCAuthInterceptorProvider;
 
 
 
+
+var _config, _$injector;
 
 class responseErrorHandlers{
 
@@ -381,7 +392,7 @@ class responseErrorHandlers{
 class InterceptorConfig{
 
     constructor(){
-        this.responseErrorHandlers = new responseErrorHandlers;
+        this.responseErrorHandlers = new responseErrorHandlers();
     };
 
 }
@@ -391,18 +402,22 @@ class InterceptorConfig{
 class AuthInterceptor{
 
     constructor(config){
-        this.config = config;
+        console.log('Initiating AuthInterceptor', this);
+        _config = config;
     };
 
     request(config){
+        console.log('AuthInterceptor', 'request');
         return config;
     };
 
-    requestError(response){
-        var handler = this.config.responseErrorHandlers[response.status];
-        if(typeof handler === 'function'){
-            handler(response.data);
-        }
+    responseError(response){
+        console.log('AuthInterceptor', 'responseError');
+        let $state = _$injector.get('$state');
+        console.log('$state', $state);
+        let handler = _config.responseErrorHandlers[response.status] || __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */];
+        handler(response.data, _$injector);
+        return response;
     };
 
 }
@@ -415,7 +430,8 @@ function PCAuthInterceptorProvider(){
 
     self.config = new InterceptorConfig();
 
-    self.$get = function(){
+    self.$get = function($injector){
+        _$injector = $injector;
         return new AuthInterceptor(self.config );
     };
 
@@ -428,37 +444,53 @@ function PCAuthInterceptorProvider(){
 
 "use strict";
 /* unused harmony export stateChangeHandler */
-/* unused harmony export routerDecorator */
+/* harmony export (immutable) */ __webpack_exports__["a"] = routerDecorator;
 
 
 let Auth;
 
+function handleConfigError(stateName, role){
+    console.error(
+        `Error:\n
+        Invalid restrict value provided in ${stateName}.\n
+        It should be either number or array of numbers.\n
+        ${typeof role} given.`);
+        return;
+}
+
 function stateChangeHandler(event, nextState){
 
+    console.log('routerDecorator', nextState);
     if(!nextState.restrict){
+        console.log('routerDecorator no need to check role');
         return;
     }
+
+    console.log('routerDecorator need to check role');
 
     let allowedRoles = [];
 
     if(typeof nextState.restrict === 'number'){
         allowedRoles.push(nextState.restrict);
+    }else if (typeof nextState.restrict == 'string') {
+        if(isNaN(nextState.restrict)){
+            return handleConfigError(nextState.name, nextState.restrict);
+        }
+        allowedRoles.push(Number(nextState.restrict));
     } else if(typeof nextState.restrict === 'Array'){
         allowedRoles = nextState.restrict;
     }else{
-        console.error(
-            `Error:\n
-            Invalid restrict value provided in ${nextState.name}.\n
-            It should be either number or array of numbers.\n
-            ${typeof nextState.restrict} given.`);
-        return;
+        return handleConfigError(nextState.name, nextState.restrict);
     }
 
-    Auth.hasRole(allowedRoles)
+    let hasRole = Auth.hasRole(allowedRoles);
+    return hasRole
         .then(has =>{
             if(has){
+                console.log('routerDecorator has role');
                 return;
             }
+            console.log('routerDecorator has no role');
 
             event.preventDefault();
         });
@@ -667,11 +699,11 @@ function addInterceptor($httpProvider) {
 }
 
 angular.module(MODULE_NAME, dependencies)
-    // .provider('PCAuthInterceptor', PCAuthInterceptorProvider)
-    // .run(routerDecorator)
+    .provider('PCAuthInterceptor', __WEBPACK_IMPORTED_MODULE_2__src_interceptor_provider__["a" /* PCAuthInterceptorProvider */])
+    .run(__WEBPACK_IMPORTED_MODULE_4__src_router_decorator__["a" /* routerDecorator */])
     .provider('PCAuth', __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__["a" /* PCAuthProvider */])
     .provider('PCUser', __WEBPACK_IMPORTED_MODULE_3__src_user_provider__["a" /* PCUserProvider */])
-    // .config(['$httpProvider', addInterceptor])
+    .config(['$httpProvider', addInterceptor])
     .name
     ;
 

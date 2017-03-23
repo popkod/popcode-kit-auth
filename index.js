@@ -16,10 +16,10 @@ function addInterceptor($httpProvider) {
 }
 
 angular.module(MODULE_NAME, dependencies)
-    // .provider('PCAuthInterceptor', PCAuthInterceptorProvider)
-    // .run(routerDecorator)
+    .provider('PCAuthInterceptor', PCAuthInterceptorProvider)
+    .run(routerDecorator)
     .provider('PCAuth', PCAuthProvider)
     .provider('PCUser', PCUserProvider)
-    // .config(['$httpProvider', addInterceptor])
+    .config(['$httpProvider', addInterceptor])
     .name
     ;

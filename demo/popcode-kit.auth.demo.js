@@ -71,31 +71,75 @@ angular.module('popcode-kit.demo.auth', [
                 });
         };
     })
-    .config(function(PCUserProvider, PCAuthProvider,
+    // .provider('httpHandlers', function TestProvider(){
+    //     var _state;
+    //     this.test = function(){
+    //         console.log('test handler');
+    //         _state.go('login');
+    //     };
+    //     this.$get = function($state){
+    //         console.log('initiating httpHandlersProvider');
+    //         _state = $state;
+    //         return new TestProvider();
+    //     };
+    // })
+    .config(function(PCUserProvider, PCAuthProvider, PCAuthInterceptorProvider,
         $stateProvider, $urlRouterProvider,
-        $locationProvider, Settings){
+        $locationProvider, Settings, $injector){
+
+        var state;
 
         PCUserProvider.config.endpoint = Settings.apiUrl+'users';
         PCAuthProvider.config.endpoint = Settings.apiUrl;
 
+
+        PCAuthInterceptorProvider.config.responseErrorHandlers[401] = function(response, _$injector){
+            console.log('Got 401; redirecting to login');
+            // $injector.get('$state');
+
+
+                var $state = _$injector.get('$state');
+                console.log('ASDF $state', $state);
+                console.log($injector === _$injector);
+
+            // (state || (state = $injector.get('$state')))
+            $state
+            // $stateProvider
+                .go('login');
+
+        };
+        PCAuthInterceptorProvider.config.responseErrorHandlers[403] = function(response){
+            console.log('Got 403');
+        };
+
         $urlRouterProvider
             .otherwise('/');
 
-        $locationProvider
-            .html5Mode({
-                enabled: true
-            });
+        // $locationProvider
+        //     .html5Mode({
+        //         enabled: true
+        //     });
 
         $stateProvider
-            // .state('main', {
-            //     url: '/',
-            //     templateUrl: '/main.html',
-            //     controller: 'MainCtrl'
-            // })
             .state('main', {
                 url: '/',
+                templateUrl: '/main.html',
+                controller: 'MainCtrl'
+            })
+            .state('route1', {
+                url: '/route1',
+                templateUrl: '/main.html',
+                controller: 'MainCtrl',
+                restrict: 1
+            })
+            .state('login', {
+                url: '/login',
                 templateUrl: '/login.html',
                 controller: 'LoginCtrl'
-            });
+            })
+            ;
+    })
+    .run(function($state){
+        window.$state = $state;
     })
 ;
