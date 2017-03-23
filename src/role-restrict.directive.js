@@ -68,7 +68,6 @@ export function roleRestrictConfig(PCAuth, $parse) {
             restrict: '&pcRoleRestrict'
         },
         template: '<div ng-transclude></div>',
-        link: RoleRestricterLink,
-        controller: RoleRestricterCtrl
+        link: RoleRestricterLink
     };
 };

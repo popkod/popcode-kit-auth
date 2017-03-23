@@ -535,8 +535,7 @@ function roleRestrictConfig(PCAuth, $parse) {
             restrict: '&pcRoleRestrict'
         },
         template: '<div ng-transclude></div>',
-        link: RoleRestricterLink,
-        controller: RoleRestricterCtrl
+        link: RoleRestricterLink
     };
 };
 
@@ -561,15 +560,16 @@ function handleConfigError(stateName, role){
         return;
 }
 
-function stateChangeHandler(event, nextState){
+function stateChangeHandler(event, nextState, nextParams, fromState,
+        fromParams){
 
-    //console.log('routerDecorator', nextState);
+    // console.log('routerDecorator', nextState, fromState);
     if(!nextState.restrict){
-        //console.log('routerDecorator no need to check role');
+        // console.log('routerDecorator no need to check role');
         return;
     }
 
-    //console.log('routerDecorator need to check role');
+    // console.log('routerDecorator need to check role');
 
     let allowedRoles = [];
 
@@ -590,12 +590,22 @@ function stateChangeHandler(event, nextState){
     return hasRole
         .then(has =>{
             if(has){
-                //console.log('routerDecorator has role');
+                // console.log('routerDecorator has role');
                 return;
             }
-            //console.log('routerDecorator has no role');
+            // console.log('routerDecorator has no role');
 
             event.preventDefault();
+
+            if(fromState.name === ""){
+                // first Route
+                // Should redirect to default route
+
+            }else {
+                // Navigating inside application
+                // Should return to previous route
+                $state.transitionTo(fromState.name);
+            }
         });
 };
 
