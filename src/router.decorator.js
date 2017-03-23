@@ -1,6 +1,9 @@
 'use strict';
 
-let Auth;
+let
+    Auth,
+    _$state
+    ;
 
 function handleConfigError(stateName, role){
     console.error(
@@ -55,14 +58,14 @@ export function stateChangeHandler(event, nextState, nextParams, fromState,
             }else {
                 // Navigating inside application
                 // Should return to previous route
-                $state.transitionTo(fromState.name);
+                _$state.transitionTo(fromState.name);
             }
         });
 };
 
 export function routerDecorator($rootScope, $state, PCAuth){
     Auth = PCAuth;
-
+    _$state = $state;
     $rootScope.$on('$stateChangeStart', stateChangeHandler);
 
 };

@@ -604,7 +604,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /* harmony export (immutable) */
     __webpack_exports__["a"] = routerDecorator;
 
-    var Auth = void 0;
+    var Auth = void 0,
+        _$state = void 0;
 
     function handleConfigError(stateName, role) {
         console.error('Error:\n\n        Invalid restrict value provided in ' + stateName + '.\n\n        It should be either number or array of numbers.\n\n        ' + (typeof role === 'undefined' ? 'undefined' : _typeof(role)) + ' given.');
@@ -653,14 +654,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             } else {
                 // Navigating inside application
                 // Should return to previous route
-                $state.transitionTo(fromState.name);
+                _$state.transitionTo(fromState.name);
             }
         });
     };
 
     function routerDecorator($rootScope, $state, PCAuth) {
         Auth = PCAuth;
-
+        _$state = $state;
         $rootScope.$on('$stateChangeStart', stateChangeHandler);
     };
 

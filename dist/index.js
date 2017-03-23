@@ -549,7 +549,10 @@ function roleRestrictConfig(PCAuth, $parse) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = routerDecorator;
 
 
-let Auth;
+let
+    Auth,
+    _$state
+    ;
 
 function handleConfigError(stateName, role){
     console.error(
@@ -604,14 +607,14 @@ function stateChangeHandler(event, nextState, nextParams, fromState,
             }else {
                 // Navigating inside application
                 // Should return to previous route
-                $state.transitionTo(fromState.name);
+                _$state.transitionTo(fromState.name);
             }
         });
 };
 
 function routerDecorator($rootScope, $state, PCAuth){
     Auth = PCAuth;
-
+    _$state = $state;
     $rootScope.$on('$stateChangeStart', stateChangeHandler);
 
 };
