@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -462,6 +462,90 @@ function PCAuthInterceptorProvider(){
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(0);
+/* unused harmony export RoleRestricterLink */
+/* harmony export (immutable) */ __webpack_exports__["a"] = roleRestrictConfig;
+
+
+
+
+let
+    _PCAuth,
+    _$parse
+    ;
+
+/**
+ * Shows an element via removing `ng-hide` class
+ * @param   {Object}   element      jqLite element
+ */
+function show(element){
+    element.removeClass('ng-hide');
+}
+
+/**
+ * Hides an element via adding `ng-hide` class
+ * @param   {Object}   element      jqLite element
+ */
+function hide(element){
+    element.addClass('ng-hide');
+}
+
+/**
+ * Link function of the directive
+ * Compares the passed number or array of numbers
+ * with the users role number.
+ * If the array contains the user's role, or the given number equals to
+ * it, then it makes the element visible, otherwise hidden.
+ */
+function RoleRestricterLink($scope, element, attrs) {
+
+    let
+        me,
+        watcher = __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */],
+        roles = _$parse(attrs.pcRoleRestrict)($scope);
+
+    //First hide the element
+    hide(element);
+
+
+    _PCAuth.hasRole(roles)
+        // When the user resolved, it comperses the roles
+        .then(has => {
+            (has ? show : hide)(element);
+        })
+        .catch(function(){
+            show(element);
+        })
+
+    element.on('$destroy', function(){
+        // Clean up $scope watcher
+        watcher();
+    });
+};
+
+function roleRestrictConfig(PCAuth, $parse) {
+
+    _PCAuth = PCAuth;
+    _$parse = $parse;
+
+    return {
+        restict: 'E',
+        transclude: true,
+        scope: {
+            restrict: '&pcRoleRestrict'
+        },
+        template: '<div ng-transclude></div>',
+        link: RoleRestricterLink,
+        controller: RoleRestricterCtrl
+    };
+};
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* unused harmony export stateChangeHandler */
 /* harmony export (immutable) */ __webpack_exports__["a"] = routerDecorator;
 
@@ -524,7 +608,7 @@ function routerDecorator($rootScope, $state, PCAuth){
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -690,7 +774,7 @@ function PCUserProvider(){
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -698,8 +782,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_interceptor_provider__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_user_provider__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_router_decorator__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_user_provider__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_router_decorator__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_role_restrict_directive__ = __webpack_require__(4);
+
 
 
 
@@ -722,6 +808,7 @@ angular.module(MODULE_NAME, dependencies)
     .run(__WEBPACK_IMPORTED_MODULE_4__src_router_decorator__["a" /* routerDecorator */])
     .provider('PCAuth', __WEBPACK_IMPORTED_MODULE_1__src_auth_provider__["a" /* PCAuthProvider */])
     .provider('PCUser', __WEBPACK_IMPORTED_MODULE_3__src_user_provider__["a" /* PCUserProvider */])
+    .directive('pcRoleRestrict', __WEBPACK_IMPORTED_MODULE_5__src_role_restrict_directive__["a" /* roleRestrictConfig */])
     .config(['$httpProvider', addInterceptor])
     .name
     ;

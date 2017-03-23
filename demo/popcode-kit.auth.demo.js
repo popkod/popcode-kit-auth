@@ -17,8 +17,17 @@ angular.module('popcode-kit.demo.auth', [
                 });
         };
     })
-    .controller('MainCtrl', function($scope, PCUser, $resource, Settings, $q, $uibModal){
+    .controller('MainCtrl', function($scope, PCUser, PCAuth, $resource, Settings, $q, $uibModal){
         $scope.users = PCUser.index();
+
+        PCAuth.me.then(function(me){
+            $scope.me = me;
+            console.log('Me', $scope.me);
+            // console.log('Has role 1?', $scope.me.hasRole(1));
+            // console.log('Has role 2?', $scope.me.hasRole(2));
+            // console.log('Has role 1|2?', $scope.me.hasRole([1,2]));
+            // console.log('Has role 3|4?', $scope.me.hasRole([3,4]));
+        });
 
         var confirmStuff = function(text){
             return $uibModal.open({
@@ -40,13 +49,6 @@ angular.module('popcode-kit.demo.auth', [
         };
 
         $scope.save = function($form){
-            // PCUser.save($scope.user, $scope.users, $form)
-            //     .then(function(result){
-            //         $scope.user = {};
-            //     })
-            //     .catch(function(response){
-            //         console.log('b', $form);
-            //     });
             PCUser.save($scope.user, $form)
                 .then(function(result){
                     $scope.user = {};
@@ -62,14 +64,6 @@ angular.module('popcode-kit.demo.auth', [
 
     })
     .controller('LoginCtrl', function($scope, PCAuth){
-        PCAuth.me.then(function(me){
-            $scope.me = me;
-            console.log('Me', $scope.me);
-            console.log('Has role 1?', $scope.me.hasRole(1));
-            console.log('Has role 2?', $scope.me.hasRole(2));
-            console.log('Has role 1|2?', $scope.me.hasRole([1,2]));
-            console.log('Has role 3|4?', $scope.me.hasRole([3,4]));
-        });
         $scope.login = function($form){
             PCAuth.login($scope.user, $form)
                 .then(function(data){
@@ -137,7 +131,8 @@ angular.module('popcode-kit.demo.auth', [
             .state('main', {
                 url: '/',
                 templateUrl: '/main.html',
-                controller: 'MainCtrl'
+                controller: 'MainCtrl',
+                restrict: [2,3,4]
             })
             .state('route1', {
                 url: '/route1',
