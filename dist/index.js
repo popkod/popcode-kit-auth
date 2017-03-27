@@ -362,7 +362,8 @@ function PCAuthProvider(){
 
 var _config,
     _$injector,
-    _$cookies
+    _$cookies,
+    _$q
     ;
 
 class responseErrorHandlers{
@@ -420,7 +421,8 @@ class AuthInterceptor{
         console.error('AuthInterceptor', 'responseError', response);
         let handler = _config.responseErrorHandlers[response.status] || __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */];
         handler(response.data, _$injector);
-        return response;
+        return _$q.reject(response)
+        // return response;
     };
 
 }
@@ -433,9 +435,10 @@ function PCAuthInterceptorProvider(){
 
     self.config = new InterceptorConfig();
 
-    self.$get = function($injector, $cookies){
+    self.$get = function($injector, $cookies, $q){
         _$injector = $injector;
         _$cookies = $cookies;
+        _$q = $q;
         return new AuthInterceptor(self.config );
     };
 

@@ -417,7 +417,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(0);
     /* harmony export (immutable) */__webpack_exports__["a"] = PCAuthInterceptorProvider;
 
-    var _config, _$injector, _$cookies;
+    var _config, _$injector, _$cookies, _$q;
 
     var responseErrorHandlers = function responseErrorHandlers() {
         _classCallCheck(this, responseErrorHandlers);
@@ -478,7 +478,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 console.error('AuthInterceptor', 'responseError', response);
                 var handler = _config.responseErrorHandlers[response.status] || __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */];
                 handler(response.data, _$injector);
-                return response;
+                return _$q.reject(response);
+                // return response;
             }
         }]);
 
@@ -495,9 +496,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         self.config = new InterceptorConfig();
 
-        self.$get = function ($injector, $cookies) {
+        self.$get = function ($injector, $cookies, $q) {
             _$injector = $injector;
             _$cookies = $cookies;
+            _$q = $q;
             return new AuthInterceptor(self.config);
         };
     };
