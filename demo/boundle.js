@@ -576,9 +576,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return {
             restict: 'E',
             transclude: true,
-            scope: {
-                restrict: '&pcRoleRestrict'
-            },
+            // scope: {
+            //     restrict: '&pcRoleRestrict'
+            // },
             link: RoleRestricterLink
         };
     };

@@ -524,9 +524,9 @@ function roleRestrictConfig(PCAuth, $parse) {
     return {
         restict: 'E',
         transclude: true,
-        scope: {
-            restrict: '&pcRoleRestrict'
-        },
+        // scope: {
+        //     restrict: '&pcRoleRestrict'
+        // },
         link: RoleRestricterLink
     };
 };
