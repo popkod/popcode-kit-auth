@@ -157,13 +157,27 @@ let _PCUser,
 
 class User{
 
-    constructor({id, name, email, role, meta, roleObject, token}){
-        this.name = name || '';
-        this.email = email || '';
-        this.role = role;
-        this.role_object = roleObject || {};
-        this.meta = meta || {};
-        this.token = token;
+    // constructor({id, name, email, role, meta, roleObject, token}){
+    //     this.name = name || '';
+    //     this.email = email || '';
+    //     this.role = role;
+    //     this.role_object = roleObject || {};
+    //     this.meta = meta || {};
+    //     this.token = token;
+    // };
+    constructor(data){
+        let user = this;
+
+        this.name = data.name || '';
+        this.email = data.email || '';
+        this.role = data.role;
+        this.role_object = data.roleObject || {};
+        this.meta = data.meta || {};
+        this.token = data.token;
+
+        Object.keys(data).forEach(function(key){
+            user[key] = data[key];
+        });
     };
 
     /**
@@ -211,10 +225,6 @@ class Auth{
         this._me = this._getMe();
     };
 
-    _etxendUser(user, data){
-        return _lodash.extend(user, data);
-    }
-
     /**
      * Handles form errors
      * @param   {Objec}                 $form   Angular form
@@ -237,7 +247,7 @@ class Auth{
             if(_$cookies.get('token')){
                 _PCUser.me().$promise
                     .then(function(response){
-                        _auth._me = auth._etxendUser(new User(response), response);
+                        _auth._me = new User(response);
                         resolve(_auth._me);
                     })
                     .catch(function(response){
@@ -268,7 +278,7 @@ class Auth{
                     if(res.status === 200){
                         // console.log('auth login ok', res);
                         _$cookies.put('token', res.data.token);
-                        auth._me = auth._etxendUser(new User(res.data), res.data);
+                        auth._me = new User(res.data);
                         return resolve(auth._me);
                     }else{
                         return auth.errorHandler($form, reject)(res);

@@ -181,23 +181,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _$cookies = void 0;
 
     var User = function () {
-        function User(_ref) {
-            var id = _ref.id,
-                name = _ref.name,
-                email = _ref.email,
-                role = _ref.role,
-                meta = _ref.meta,
-                roleObject = _ref.roleObject,
-                token = _ref.token;
 
+        // constructor({id, name, email, role, meta, roleObject, token}){
+        //     this.name = name || '';
+        //     this.email = email || '';
+        //     this.role = role;
+        //     this.role_object = roleObject || {};
+        //     this.meta = meta || {};
+        //     this.token = token;
+        // };
+        function User(data) {
             _classCallCheck(this, User);
 
-            this.name = name || '';
-            this.email = email || '';
-            this.role = role;
-            this.role_object = roleObject || {};
-            this.meta = meta || {};
-            this.token = token;
+            var user = this;
+
+            this.name = data.name || '';
+            this.email = data.email || '';
+            this.role = data.role;
+            this.role_object = data.roleObject || {};
+            this.meta = data.meta || {};
+            this.token = data.token;
+
+            Object.keys(data).forEach(function (key) {
+                user[key] = data[key];
+            });
         }
 
         _createClass(User, [{
@@ -260,10 +267,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(Auth, [{
-            key: '_etxendUser',
-            value: function _etxendUser(user, data) {
-                return _lodash.extend(user, data);
-            }
+            key: 'errorHandler',
+
 
             /**
              * Handles form errors
@@ -272,9 +277,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              *                                  called after form error handling
              * @return  {Fuction}
              */
-
-        }, {
-            key: 'errorHandler',
             value: function errorHandler($form, reject) {
                 return __WEBPACK_IMPORTED_MODULE_0__form__["a" /* default */].pushValidationMessageToForm($form, reject);
             }
@@ -292,7 +294,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return _$q(function (resolve, reject) {
                     if (_$cookies.get('token')) {
                         _PCUser.me().$promise.then(function (response) {
-                            _auth._me = auth._etxendUser(new User(response), response);
+                            _auth._me = new User(response);
                             resolve(_auth._me);
                         }).catch(function (response) {
                             resolve({});
@@ -322,7 +324,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         if (res.status === 200) {
                             // console.log('auth login ok', res);
                             _$cookies.put('token', res.data.token);
-                            auth._me = auth._etxendUser(new User(res.data), res.data);
+                            auth._me = new User(res.data);
                             return resolve(auth._me);
                         } else {
                             return auth.errorHandler($form, reject)(res);
@@ -706,10 +708,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      */
 
     var UserResource = function () {
-        function UserResource(_ref2, $resource) {
-            var endpoint = _ref2.endpoint,
-                paramDefaults = _ref2.paramDefaults,
-                actions = _ref2.actions;
+        function UserResource(_ref, $resource) {
+            var endpoint = _ref.endpoint,
+                paramDefaults = _ref.paramDefaults,
+                actions = _ref.actions;
 
             _classCallCheck(this, UserResource);
 
