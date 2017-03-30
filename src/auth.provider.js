@@ -63,6 +63,10 @@ export class Auth{
         this._me = this._getMe();
     };
 
+    _etxendUser(user, data){
+        return _lodash.extend(user, data);
+    }
+
     /**
      * Handles form errors
      * @param   {Objec}                 $form   Angular form
@@ -85,7 +89,7 @@ export class Auth{
             if(_$cookies.get('token')){
                 _PCUser.me().$promise
                     .then(function(response){
-                        _auth._me = new User(response);
+                        _auth._me = auth._etxendUser(new User(response), response);
                         resolve(_auth._me);
                     })
                     .catch(function(response){
@@ -116,7 +120,7 @@ export class Auth{
                     if(res.status === 200){
                         // console.log('auth login ok', res);
                         _$cookies.put('token', res.data.token);
-                        auth._me = new User(res.data);
+                        auth._me = auth._etxendUser(new User(res.data), res.data);
                         return resolve(auth._me);
                     }else{
                         return auth.errorHandler($form, reject)(res);

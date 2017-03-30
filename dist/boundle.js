@@ -260,8 +260,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(Auth, [{
-            key: 'errorHandler',
-
+            key: '_etxendUser',
+            value: function _etxendUser(user, data) {
+                return _lodash.extend(user, data);
+            }
 
             /**
              * Handles form errors
@@ -270,6 +272,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              *                                  called after form error handling
              * @return  {Fuction}
              */
+
+        }, {
+            key: 'errorHandler',
             value: function errorHandler($form, reject) {
                 return __WEBPACK_IMPORTED_MODULE_0__form__["a" /* default */].pushValidationMessageToForm($form, reject);
             }
@@ -287,7 +292,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return _$q(function (resolve, reject) {
                     if (_$cookies.get('token')) {
                         _PCUser.me().$promise.then(function (response) {
-                            _auth._me = new User(response);
+                            _auth._me = auth._etxendUser(new User(response), response);
                             resolve(_auth._me);
                         }).catch(function (response) {
                             resolve({});
@@ -317,7 +322,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         if (res.status === 200) {
                             // console.log('auth login ok', res);
                             _$cookies.put('token', res.data.token);
-                            auth._me = new User(res.data);
+                            auth._me = auth._etxendUser(new User(res.data), res.data);
                             return resolve(auth._me);
                         } else {
                             return auth.errorHandler($form, reject)(res);
