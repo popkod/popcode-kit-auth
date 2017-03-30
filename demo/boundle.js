@@ -203,7 +203,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this.token = data.token;
 
             Object.keys(data).forEach(function (key) {
-                user[key] = data[key];
+                var patt = new RegExp(/^\$/);
+                if (!patt.test(key)) {
+                    user[key] = data[key];
+                }
             });
         }
 

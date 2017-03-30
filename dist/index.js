@@ -176,7 +176,10 @@ class User{
         this.token = data.token;
 
         Object.keys(data).forEach(function(key){
-            user[key] = data[key];
+            var patt = new RegExp(/^\$/);
+            if(!patt.test(key)){
+                user[key] = data[key];
+            }
         });
     };
 
