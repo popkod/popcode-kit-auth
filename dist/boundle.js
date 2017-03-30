@@ -264,6 +264,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function Auth(config) {
             _classCallCheck(this, Auth);
 
+            this.statusChangeCallbacks = [];
             this._authChecked = false;
             this.config = config;
             this._me = this._getMe();
@@ -310,6 +311,51 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
 
             /**
+             * Add callback to the status change callback array
+             */
+
+        }, {
+            key: '_addStatusChangeCallback',
+            value: function _addStatusChangeCallback(cb) {
+                var auth = this;
+                if (typeof cb !== 'function') {
+                    console.error('Status change callback must be a function. ' + (typeof cb === 'undefined' ? 'undefined' : _typeof(cb)) + ' given.');
+                    return;
+                }
+
+                auth.statusChangeCallbacks.push(cb);
+            }
+
+            /**
+             * Remove callback from the status change callback array
+             */
+
+        }, {
+            key: '_removeStatusChangeCallback',
+            value: function _removeStatusChangeCallback(cb) {
+                var auth = this;
+                var index = auth.statusChangeCallbacks.indexOf(cb);
+                if (index > -1) {
+                    auth.statusChangeCallbacks.splice(index, 1);
+                } else {
+                    console.warn('Calback could not found.');
+                }
+            }
+
+            /**
+             * Run status change callbacks
+             */
+
+        }, {
+            key: '_runStatusChangeCallbacks',
+            value: function _runStatusChangeCallbacks(me) {
+                var auth = this;
+                auth.statusChangeCallbacks.forEach(function (cb) {
+                    cb(me);
+                });
+            }
+
+            /**
              * Log in the current user
              * @param   {Object}            data    user data
              * @param   {Object}(optional)  $form   Angular form, what should be
@@ -320,14 +366,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: 'login',
             value: function login(data, $form) {
-                //console.log('Auth login');
                 var auth = this;
                 return new Promise(function (resolve, reject) {
                     return _$http.post(auth.config.endpoint + 'login', data).then(function (res) {
                         if (res.status === 200) {
-                            // console.log('auth login ok', res);
                             _$cookies.put('token', res.data.token);
                             auth._me = new User(res.data);
+                            auth._runStatusChangeCallbacks(auth._me);
                             return resolve(auth._me);
                         } else {
                             return auth.errorHandler($form, reject)(res);
@@ -349,6 +394,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     _$http.get(auth.config.endpoint + 'logout').then(function (response) {
                         _$cookies.remove('token');
                         auth._me = new User({});
+                        auth._runStatusChangeCallbacks(auth._me);
                         resolve(response);
                     }).catch(function (response) {
                         reject(response);
@@ -373,6 +419,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return _$q.when(value).then(function (me) {
                     return me.hasRole(roles);
                 });
+            }
+
+            /**
+             * Add a callback which is called when user login status changes
+             * Returns the remove function, so call it to deregister the specific
+             * callback
+             */
+
+        }, {
+            key: 'onStatusChange',
+            value: function onStatusChange(cb) {
+                var auth = this;
+                auth._addStatusChangeCallback(cb);
+                return function () {
+                    auth._removeStatusChangeCallback(cb);
+                };
             }
         }, {
             key: 'me',

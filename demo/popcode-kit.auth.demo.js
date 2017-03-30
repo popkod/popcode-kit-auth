@@ -74,6 +74,15 @@ angular.module('popcode-kit.demo.auth', [
                     console.log('Failed to login', response);
                 });
         };
+
+        var testFn = function(user){
+            console.log('typeof user', typeof user);
+            console.log('onStatusChange', user);
+        }
+
+        var statusChangeHandler = PCAuth.onStatusChange(testFn);
+
+        $scope.$on('$destroy', statusChangeHandler);
     })
     .controller('route1', function($scope){
 

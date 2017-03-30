@@ -223,6 +223,7 @@ class AuthConfig{
 class Auth{
 
     constructor(config){
+        this.statusChangeCallbacks = [];
         this._authChecked = false;
         this.config = config;
         this._me = this._getMe();
@@ -265,6 +266,42 @@ class Auth{
     }
 
     /**
+     * Add callback to the status change callback array
+     */
+    _addStatusChangeCallback(cb){
+        let auth = this;
+        if(typeof cb !== 'function'){
+            console.error(`Status change callback must be a function. ${typeof cb} given.`);
+            return;
+        }
+
+        auth.statusChangeCallbacks.push(cb);
+    }
+
+    /**
+     * Remove callback from the status change callback array
+     */
+    _removeStatusChangeCallback(cb){
+        let auth = this;
+        let index = auth.statusChangeCallbacks.indexOf(cb);
+        if(index > -1){
+            auth.statusChangeCallbacks.splice(index, 1);
+        }else{
+            console.warn('Calback could not found.');
+        }
+    }
+
+    /**
+     * Run status change callbacks
+     */
+    _runStatusChangeCallbacks(me){
+        let auth = this;
+        auth.statusChangeCallbacks.forEach(function(cb){
+            cb(me);
+        });
+    }
+
+    /**
      * Log in the current user
      * @param   {Object}            data    user data
      * @param   {Object}(optional)  $form   Angular form, what should be
@@ -272,16 +309,15 @@ class Auth{
      * @return  {Promise}
      */
     login(data, $form){
-        //console.log('Auth login');
         let auth = this;
         return new Promise(function(resolve, reject){
             return _$http
                 .post(`${auth.config.endpoint}login`, data)
                 .then(res => {
                     if(res.status === 200){
-                        // console.log('auth login ok', res);
                         _$cookies.put('token', res.data.token);
                         auth._me = new User(res.data);
+                        auth._runStatusChangeCallbacks(auth._me);
                         return resolve(auth._me);
                     }else{
                         return auth.errorHandler($form, reject)(res);
@@ -304,6 +340,7 @@ class Auth{
             .then(response => {
                 _$cookies.remove('token');
                 auth._me = new User({});
+                auth._runStatusChangeCallbacks(auth._me);
                 resolve(response);
             })
             .catch(response => {
@@ -339,6 +376,19 @@ class Auth{
             .then(me => {
                 return me.hasRole(roles);
             })
+    }
+
+    /**
+     * Add a callback which is called when user login status changes
+     * Returns the remove function, so call it to deregister the specific
+     * callback
+     */
+    onStatusChange(cb){
+        let auth = this;
+        auth._addStatusChangeCallback(cb);
+        return function(){
+            auth._removeStatusChangeCallback(cb);
+        }
     }
 
 }
