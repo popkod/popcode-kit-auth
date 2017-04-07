@@ -308,11 +308,11 @@ class Auth{
      *                                      filled with error messeges
      * @return  {Promise}
      */
-    login(data, $form){
+    login(data, $form, route){
         let auth = this;
-        return new Promise(function(resolve, reject){
+        return new _$q(function(resolve, reject){
             return _$http
-                .post(`${auth.config.endpoint}login`, data)
+                .post(`${auth.config.endpoint}${route || 'login'}`, data)
                 .then(res => {
                     if(res.status === 200){
                         _$cookies.put('token', res.data.token);
@@ -326,7 +326,6 @@ class Auth{
                 .catch(auth.errorHandler($form, reject))
                 ;
         });
-
     }
 
     /**
@@ -335,7 +334,7 @@ class Auth{
      */
     logout(){
         let auth = this;
-        return new Promise(function(resolve, reject){
+        return new _$q(function(resolve, reject){
             _$http.get(`${auth.config.endpoint}logout`)
             .then(response => {
                 _$cookies.remove('token');
@@ -348,6 +347,23 @@ class Auth{
             })
             ;
         });
+    }
+
+    /**
+     * get the user object from the server
+     * @return {Promise}
+     */
+    refreshUser(user){
+        let auth = this;
+        if(user){
+            auth._me = new User(user);
+        }else{
+            auth._me = auth._getMe();
+        }
+        return auth.me
+            .then((me) => {
+                auth._runStatusChangeCallbacks(me);
+            });
     }
 
     /**

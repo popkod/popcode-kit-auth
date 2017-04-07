@@ -365,10 +365,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         }, {
             key: 'login',
-            value: function login(data, $form) {
+            value: function login(data, $form, route) {
                 var auth = this;
-                return new Promise(function (resolve, reject) {
-                    return _$http.post(auth.config.endpoint + 'login', data).then(function (res) {
+                return new _$q(function (resolve, reject) {
+                    return _$http.post('' + auth.config.endpoint + (route || 'login'), data).then(function (res) {
                         if (res.status === 200) {
                             _$cookies.put('token', res.data.token);
                             auth._me = new User(res.data);
@@ -390,7 +390,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: 'logout',
             value: function logout() {
                 var auth = this;
-                return new Promise(function (resolve, reject) {
+                return new _$q(function (resolve, reject) {
                     _$http.get(auth.config.endpoint + 'logout').then(function (response) {
                         _$cookies.remove('token');
                         auth._me = new User({});
@@ -399,6 +399,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }).catch(function (response) {
                         reject(response);
                     });
+                });
+            }
+
+            /**
+             * get the user object from the server
+             * @return {Promise}
+             */
+
+        }, {
+            key: 'refreshUser',
+            value: function refreshUser(user) {
+                var auth = this;
+                if (user) {
+                    auth._me = new User(user);
+                } else {
+                    auth._me = auth._getMe();
+                }
+                return auth.me.then(function (me) {
+                    auth._runStatusChangeCallbacks(me);
                 });
             }
 
