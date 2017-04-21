@@ -113,7 +113,7 @@ export class AuthConfig{
     constructor(){
         this.endpoint = '/api/';
         this.tokenRefreshEndpoint = '/refresh-token';
-        this.onTokenExpiration = () => {
+        this.onTokenExpiration = (auth) => {
             auth.refreshToken();
         };
     }

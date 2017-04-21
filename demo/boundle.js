@@ -302,7 +302,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         this.endpoint = '/api/';
         this.tokenRefreshEndpoint = '/refresh-token';
-        this.onTokenExpiration = function () {
+        this.onTokenExpiration = function (auth) {
             auth.refreshToken();
         };
     };
