@@ -6,7 +6,8 @@ angular.module('popcode-kit.demo.auth', [
     'ui.bootstrap'
 ])
     .constant('Settings', {
-        apiUrl: 'http://192.168.200.211/api/'
+        apiUrl: 'http://192.168.200.211/api/',
+        apiBaseUrl: 'http://192.168.200.211/'
     })
     .controller('HeaderCtrl', function($scope, $state, PCAuth){
         $scope.logout = function(){
@@ -78,7 +79,7 @@ angular.module('popcode-kit.demo.auth', [
         var testFn = function(user){
             console.log('typeof user', typeof user);
             console.log('onStatusChange', user);
-        }
+        };
 
         var statusChangeHandler = PCAuth.onStatusChange(testFn);
 
@@ -107,6 +108,11 @@ angular.module('popcode-kit.demo.auth', [
 
         PCUserProvider.config.endpoint = Settings.apiUrl+'users';
         PCAuthProvider.config.endpoint = Settings.apiUrl;
+        PCAuthProvider.config.tokenRefreshEndpoint = Settings.apiBaseUrl + 'refresh-token';
+        PCAuthProvider.config.onTokenExpiration = function(auth){
+            console.log('Token expired, handle in project');
+            auth.refreshToken()
+        };
 
 
         PCAuthInterceptorProvider.config.responseErrorHandlers[401] = function(response, _$injector){

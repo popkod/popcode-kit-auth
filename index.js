@@ -8,7 +8,8 @@ import {routerDecorator} from './src/router.decorator';
 import {roleRestrictConfig, RoleRestricter} from './src/role-restrict.directive';
 
 const MODULE_NAME = 'popcode-kit.auth';
-let dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash'];
+let dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash',
+    'angular-jwt'];
 
 checkModulesLoaded(dependencies);
 

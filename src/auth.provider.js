@@ -8,19 +8,11 @@ let _PCUser,
     _$timeout,
     _lodash,
     _$q,
-    _$cookies
+    _$cookies,
+    _jwtHelper
     ;
 
 export class User{
-
-    // constructor({id, name, email, role, meta, roleObject, token}){
-    //     this.name = name || '';
-    //     this.email = email || '';
-    //     this.role = role;
-    //     this.role_object = roleObject || {};
-    //     this.meta = meta || {};
-    //     this.token = token;
-    // };
     constructor(data){
         let user = this;
 
@@ -30,6 +22,8 @@ export class User{
         this.role_object = data.roleObject || {};
         this.meta = data.meta || {};
         this.token = data.token;
+
+        this.tokenExpirationHandled = false;
 
         Object.keys(data).forEach(function(key){
             var patt = new RegExp(/^\$/);
@@ -58,6 +52,43 @@ export class User{
 
         return roleList.indexOf(this.role) > -1;
     };
+
+    checkToken(){
+        if(!this.token){
+            return null;
+        }else{
+            let expiration = _jwtHelper.getTokenExpirationDate(this.token);
+            var now = new Date;
+            var utc_timestamp = Date.UTC(now.getUTCFullYear(),now.getUTCMonth(), now.getUTCDate() ,
+                 now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+            let difference = expiration - utc_timestamp;
+
+            // console.log(`Token will expire in ${difference / 1000} seconds`, `At ${expiration.toString()}`);
+            if(difference > 10 * 1000){
+                return true;
+            }else if(difference < 10 * 1000 && difference >= 0){
+                if(!this.tokenExpirationHandled){
+                    this.tokenExpirationHandled = true;
+                    return -1;
+                    return;
+                }else{
+                    return -2;
+                }
+            }else{
+                if(this.tokenExpirationHandled && this.token){
+                    this.token = null;
+                    return -3;
+                }
+                this.token = null;
+                return null;
+            }
+        }
+    }
+
+    refresh(token){
+        this.token = token;
+        this.tokenExpirationHandled = false;
+    }
 };
 
 /**
@@ -66,6 +97,10 @@ export class User{
 export class AuthConfig{
     constructor(){
         this.endpoint = '/api/';
+        this.tokenRefreshEndpoint = '/refresh-token';
+        this.onTokenExpiration = () => {
+            auth.refreshToken();
+        };
     }
 };
 
@@ -79,6 +114,7 @@ export class Auth{
         this._authChecked = false;
         this.config = config;
         this._me = this._getMe();
+        this._tokenChecker();
     };
 
     /**
@@ -107,7 +143,9 @@ export class Auth{
                         resolve(_auth._me);
                     })
                     .catch(function(response){
-                        resolve({});
+                        _$cookies.remove('token');
+                        _auth._me = new User({});
+                        resolve(_auth._me);
                     });
 
             }else{
@@ -153,6 +191,31 @@ export class Auth{
         });
     }
 
+    _tokenChecker(){
+        if(!this.tokenCheckerInterval){
+            this.tokenCheckerInterval = setInterval(() => {
+                this.me.then((me) => {
+                    let token = me.checkToken();
+                    if(token === null){
+                        // No token
+                    }else if(token === undefined){
+                        // No user
+                    }else if(token === true){
+                        // Token OK
+                    }else if(token === -1){
+                        // Token will expire need to handle
+                        this.config.onTokenExpiration(this);
+                    }else if(token === -2){
+                        // token will expire but already handled
+                    }else if(token === -3){
+                        // token expired and not refreshed. Need to logout.
+                        this.logout();
+                    }
+                });
+            }, 1000);
+        }
+    }
+
     /**
      * Log in the current user
      * @param   {Object}            data    user data
@@ -189,14 +252,17 @@ export class Auth{
         return new _$q(function(resolve, reject){
             _$http.get(`${auth.config.endpoint}logout`)
             .then(response => {
-                _$cookies.remove('token');
-                auth._me = new User({});
-                auth._runStatusChangeCallbacks(auth._me);
                 resolve(response);
             })
             .catch(response => {
-                reject(response);
+                console.warn('User logged out, but got error from API.', response);
+                resolve(response);
             })
+            .finally(() => {
+                _$cookies.remove('token');
+                auth._me = new User({});
+                auth._runStatusChangeCallbacks(auth._me);
+            });
             ;
         });
     }
@@ -216,6 +282,28 @@ export class Auth{
             .then((me) => {
                 auth._runStatusChangeCallbacks(me);
             });
+    }
+
+    refreshToken(){
+        let auth = this;
+        return new _$q(function(resolve, reject){
+            return _$http
+                .get(`${auth.config.tokenRefreshEndpoint}`)
+                .then(res => {
+                    if(res.status === 200){
+                        _$cookies.put('token', res.data.token);
+                        auth._me.refresh(res.data.token);
+                        auth._runStatusChangeCallbacks(auth._me);
+                        return resolve(auth._me);
+                    }else{
+                        return reject(res);
+                    }
+                })
+                .catch((response) => {
+                    console.error(response);
+                })
+                ;
+        });
     }
 
     /**
@@ -270,13 +358,15 @@ export function PCAuthProvider(){
 
     self.config = new AuthConfig();
 
-    self.$get = function(PCUser, $http, $timeout, $q, lodash, $cookies){
+    self.$get = function(PCUser, $http, $timeout, $q, lodash, $cookies,
+        jwtHelper){
          _PCUser = PCUser;
          _$http = $http;
          _$timeout = $timeout;
          _$q = $q;
          _lodash = lodash;
          _$cookies = $cookies;
+         _jwtHelper = jwtHelper;
          return new Auth(self.config, PCUser);
      };
 };

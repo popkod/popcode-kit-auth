@@ -12,19 +12,19 @@ export class responseErrorHandlers{
 
     constructor(){
         this[400] = function(data){
-            console.error('Error: 400', data);
+            // console.error('Error: 400', data);
         };
         this[401] = function(data){
-            console.error('Error: 401', data);
+            // console.error('Error: 401', data);
         };
         this[403] = function(data){
-            console.error('Error: 403', data);
+            // console.error('Error: 403', data);
         };
         this[404] = function(data){
-            console.error('Error: 403', data);
+            // console.error('Error: 403', data);
         };
         this[500] = function(data){
-            console.error('Error: 500', data);
+            // console.error('Error: 500', data);
         };
     }
 
@@ -56,7 +56,7 @@ export class AuthInterceptor{
     };
 
     responseError(response){
-        console.error('AuthInterceptor', 'responseError', response);
+        // console.error('AuthInterceptor', 'responseError', response);
         let handler = _config.responseErrorHandlers[response.status] || noop;
         handler(response.data, _$injector);
         return _$q.reject(response)

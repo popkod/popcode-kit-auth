@@ -178,18 +178,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _$timeout = void 0,
         _lodash = void 0,
         _$q = void 0,
-        _$cookies = void 0;
+        _$cookies = void 0,
+        _jwtHelper = void 0;
 
     var User = function () {
-
-        // constructor({id, name, email, role, meta, roleObject, token}){
-        //     this.name = name || '';
-        //     this.email = email || '';
-        //     this.role = role;
-        //     this.role_object = roleObject || {};
-        //     this.meta = meta || {};
-        //     this.token = token;
-        // };
         function User(data) {
             _classCallCheck(this, User);
 
@@ -201,6 +193,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this.role_object = data.roleObject || {};
             this.meta = data.meta || {};
             this.token = data.token;
+
+            this.tokenExpirationHandled = false;
 
             Object.keys(data).forEach(function (key) {
                 var patt = new RegExp(/^\$/);
@@ -233,6 +227,44 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 return roleList.indexOf(this.role) > -1;
             }
+        }, {
+            key: 'checkToken',
+            value: function checkToken() {
+                if (!this.token) {
+                    return null;
+                } else {
+                    var expiration = _jwtHelper.getTokenExpirationDate(this.token);
+                    var now = new Date();
+                    var utc_timestamp = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds());
+                    var difference = expiration - utc_timestamp;
+
+                    // console.log(`Token will expire in ${difference / 1000} seconds`, `At ${expiration.toString()}`);
+                    if (difference > 10 * 1000) {
+                        return true;
+                    } else if (difference < 10 * 1000 && difference >= 0) {
+                        if (!this.tokenExpirationHandled) {
+                            this.tokenExpirationHandled = true;
+                            return -1;
+                            return;
+                        } else {
+                            return -2;
+                        }
+                    } else {
+                        if (this.tokenExpirationHandled && this.token) {
+                            this.token = null;
+                            return -3;
+                        }
+                        this.token = null;
+                        return null;
+                    }
+                }
+            }
+        }, {
+            key: 'refresh',
+            value: function refresh(token) {
+                this.token = token;
+                this.tokenExpirationHandled = false;
+            }
         }]);
 
         return User;
@@ -250,6 +282,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _classCallCheck(this, AuthConfig);
 
         this.endpoint = '/api/';
+        this.tokenRefreshEndpoint = '/refresh-token';
+        this.onTokenExpiration = function () {
+            auth.refreshToken();
+        };
     };
     /* unused harmony export AuthConfig */
 
@@ -268,6 +304,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this._authChecked = false;
             this.config = config;
             this._me = this._getMe();
+            this._tokenChecker();
         }
 
         _createClass(Auth, [{
@@ -301,7 +338,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             _auth._me = new User(response);
                             resolve(_auth._me);
                         }).catch(function (response) {
-                            resolve({});
+                            _$cookies.remove('token');
+                            _auth._me = new User({});
+                            resolve(_auth._me);
                         });
                     } else {
                         _auth._me = new User({});
@@ -354,6 +393,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     cb(me);
                 });
             }
+        }, {
+            key: '_tokenChecker',
+            value: function _tokenChecker() {
+                var _this = this;
+
+                if (!this.tokenCheckerInterval) {
+                    this.tokenCheckerInterval = setInterval(function () {
+                        _this.me.then(function (me) {
+                            var token = me.checkToken();
+                            if (token === null) {
+                                // No token
+                            } else if (token === undefined) {
+                                // No user
+                            } else if (token === true) {
+                                // Token OK
+                            } else if (token === -1) {
+                                // Token will expire need to handle
+                                _this.config.onTokenExpiration(_this);
+                            } else if (token === -2) {
+                                // token will expire but already handled
+                            } else if (token === -3) {
+                                // token expired and not refreshed. Need to logout.
+                                _this.logout();
+                            }
+                        });
+                    }, 1000);
+                }
+            }
 
             /**
              * Log in the current user
@@ -392,13 +459,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var auth = this;
                 return new _$q(function (resolve, reject) {
                     _$http.get(auth.config.endpoint + 'logout').then(function (response) {
+                        resolve(response);
+                    }).catch(function (response) {
+                        console.warn('User logged out, but got error from API.', response);
+                        resolve(response);
+                    }).finally(function () {
                         _$cookies.remove('token');
                         auth._me = new User({});
                         auth._runStatusChangeCallbacks(auth._me);
-                        resolve(response);
-                    }).catch(function (response) {
-                        reject(response);
                     });
+                    ;
                 });
             }
 
@@ -418,6 +488,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
                 return auth.me.then(function (me) {
                     auth._runStatusChangeCallbacks(me);
+                });
+            }
+        }, {
+            key: 'refreshToken',
+            value: function refreshToken() {
+                var auth = this;
+                return new _$q(function (resolve, reject) {
+                    return _$http.get('' + auth.config.tokenRefreshEndpoint).then(function (res) {
+                        if (res.status === 200) {
+                            _$cookies.put('token', res.data.token);
+                            auth._me.refresh(res.data.token);
+                            auth._runStatusChangeCallbacks(auth._me);
+                            return resolve(auth._me);
+                        } else {
+                            return reject(res);
+                        }
+                    }).catch(function (response) {
+                        console.error(response);
+                    });
                 });
             }
 
@@ -487,13 +576,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         self.config = new AuthConfig();
 
-        self.$get = function (PCUser, $http, $timeout, $q, lodash, $cookies) {
+        self.$get = function (PCUser, $http, $timeout, $q, lodash, $cookies, jwtHelper) {
             _PCUser = PCUser;
             _$http = $http;
             _$timeout = $timeout;
             _$q = $q;
             _lodash = lodash;
             _$cookies = $cookies;
+            _jwtHelper = jwtHelper;
             return new Auth(self.config, PCUser);
         };
     };
@@ -514,19 +604,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _classCallCheck(this, responseErrorHandlers);
 
         this[400] = function (data) {
-            console.error('Error: 400', data);
+            // console.error('Error: 400', data);
         };
         this[401] = function (data) {
-            console.error('Error: 401', data);
+            // console.error('Error: 401', data);
         };
         this[403] = function (data) {
-            console.error('Error: 403', data);
+            // console.error('Error: 403', data);
         };
         this[404] = function (data) {
-            console.error('Error: 403', data);
+            // console.error('Error: 403', data);
         };
         this[500] = function (data) {
-            console.error('Error: 500', data);
+            // console.error('Error: 500', data);
         };
     };
     /* unused harmony export responseErrorHandlers */
@@ -566,7 +656,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: 'responseError',
             value: function responseError(response) {
-                console.error('AuthInterceptor', 'responseError', response);
+                // console.error('AuthInterceptor', 'responseError', response);
                 var handler = _config.responseErrorHandlers[response.status] || __WEBPACK_IMPORTED_MODULE_0__utils__["b" /* noop */];
                 handler(response.data, _$injector);
                 return _$q.reject(response);
@@ -967,7 +1057,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     /* harmony import */var __WEBPACK_IMPORTED_MODULE_5__src_role_restrict_directive__ = __webpack_require__(4);
 
     var MODULE_NAME = 'popcode-kit.auth';
-    var dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash'];
+    var dependencies = ['ngCookies', 'ui.router', 'ngResource', 'ngLodash', 'angular-jwt'];
 
     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__src_utils__["a" /* checkModulesLoaded */])(dependencies);
 
