@@ -53,6 +53,16 @@ export class User{
         return roleList.indexOf(this.role) > -1;
     };
 
+    /**
+     * Cheks the token lifetime and returns different values
+     * according to the remaining time
+     * @return
+     *          null    if no token
+     *          true    if more than 10 seconds remaining
+     *          -1      if less than 10 seconds remaining and need to react
+     *          -2      if less than 10 seconds remaining but already reacted
+     *          -3      if still no proper token
+     */
     checkToken(){
         if(!this.token){
             return null;
@@ -85,6 +95,11 @@ export class User{
         }
     }
 
+    /**
+     * Call after token refreshed to reinitialize the handler
+     * @param  {String} token new token
+     * @return {void}
+     */
     refresh(token){
         this.token = token;
         this.tokenExpirationHandled = false;
@@ -191,6 +206,10 @@ export class Auth{
         });
     }
 
+    /**
+     * Checks token on every seconds
+     * @return {[type]} [description]
+     */
     _tokenChecker(){
         if(!this.tokenCheckerInterval){
             this.tokenCheckerInterval = setInterval(() => {
@@ -284,6 +303,10 @@ export class Auth{
             });
     }
 
+    /**
+     * Call for token refresh
+     * @return {Promise} $q promise
+     */
     refreshToken(){
         let auth = this;
         return new _$q(function(resolve, reject){
@@ -326,6 +349,11 @@ export class Auth{
         //console.log('get token');
     }
 
+    /**
+     * Checks if current user had roles
+     * @param  {number|string|Array<number>}  roles [description]
+     * @return {Boolean}       true if has
+     */
     hasRole(roles){
         let value = _lodash.get(this._me, '$promise') ? this._me.$promise : this._me;
         return _$q.when(value)

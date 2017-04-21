@@ -229,6 +229,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: 'checkToken',
+
+
+            /**
+             * Cheks the token lifetime and returns different values
+             * according to the remaining time
+             * @return
+             *          null    if no token
+             *          true    if more than 10 seconds remaining
+             *          -1      if less than 10 seconds remaining and need to react
+             *          -2      if less than 10 seconds remaining but already reacted
+             *          -3      if still no proper token
+             */
             value: function checkToken() {
                 if (!this.token) {
                     return null;
@@ -259,6 +271,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
                 }
             }
+
+            /**
+             * Call after token refreshed to reinitialize the handler
+             * @param  {String} token new token
+             * @return {void}
+             */
+
         }, {
             key: 'refresh',
             value: function refresh(token) {
@@ -393,6 +412,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     cb(me);
                 });
             }
+
+            /**
+             * Checks token on every seconds
+             * @return {[type]} [description]
+             */
+
         }, {
             key: '_tokenChecker',
             value: function _tokenChecker() {
@@ -490,6 +515,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     auth._runStatusChangeCallbacks(me);
                 });
             }
+
+            /**
+             * Call for token refresh
+             * @return {Promise} $q promise
+             */
+
         }, {
             key: 'refreshToken',
             value: function refreshToken() {
@@ -517,9 +548,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         }, {
             key: 'getToken',
-            value: function getToken() {
-                //console.log('get token');
-            }
+            value: function getToken() {}
+            //console.log('get token');
+
+
+            /**
+             * Checks if current user had roles
+             * @param  {number|string|Array<number>}  roles [description]
+             * @return {Boolean}       true if has
+             */
+
         }, {
             key: 'hasRole',
             value: function hasRole(roles) {
