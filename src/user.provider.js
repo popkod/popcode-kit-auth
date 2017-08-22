@@ -26,8 +26,8 @@ export class UserResourceConfig{
                 }
             }
         };
-    };
-};
+    }
+}
 
 /**
  * User resource class
@@ -104,8 +104,8 @@ export class UserResource{
      */
     save(data, ...parameters){
 
-        let list = undefined,
-            $form = undefined,
+        let list,
+            $form,
             instance = new this.resource(data);
 
         parameters.forEach(function(param){
@@ -132,7 +132,7 @@ export class UserResource{
             }, this.errorHandler($form));
         }
     }
-};
+}
 
 /**
  * User Resource Provider
@@ -150,4 +150,4 @@ export function PCUserProvider(){
         return new UserResource(self.config, $resource);
     };
 
-};
+}

@@ -29,7 +29,7 @@ export function stateChangeHandler(event, nextState, nextParams, fromState,
 
     if(typeof nextState.restrict === 'number'){
         allowedRoles.push(nextState.restrict);
-    }else if (typeof nextState.restrict == 'string') {
+    }else if (typeof nextState.restrict === 'string') {
         if(isNaN(nextState.restrict)){
             return handleConfigError(nextState.name, nextState.restrict);
         }
@@ -61,11 +61,11 @@ export function stateChangeHandler(event, nextState, nextParams, fromState,
                 _$state.transitionTo(fromState.name);
             }
         });
-};
+}
 
 export function routerDecorator($rootScope, $state, PCAuth){
     Auth = PCAuth;
     _$state = $state;
     $rootScope.$on('$stateChangeStart', stateChangeHandler);
 
-};
+}

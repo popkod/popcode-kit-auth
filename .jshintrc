@@ -1,0 +1,17 @@
+{
+    "esversion" : 6,
+    "camelcase" : true,
+    "curly" : true,
+    "eqeqeq" : true,
+    "forin" : true,
+    "freeze" : true,
+    "futurehostile" : true,
+    "undef" : true,
+    "unused" : true,
+
+    "browser" : true,
+    "browserify" : true,
+    "devel" : true,
+    "module" : true,
+    "node" : true
+}

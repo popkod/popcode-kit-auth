@@ -1,13 +1,11 @@
 'use strict';
 
-export default class User(){
-
-    this.name = '';
-    this.role = '';
-    this.token = '';
+export default class User{
 
     constructor(){
-
+        this.name = '';
+        this.role = '';
+        this.token = '';
     }
-    
-};
+
+}

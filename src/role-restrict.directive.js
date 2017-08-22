@@ -53,13 +53,13 @@ export function RoleRestricterLink($scope, element, attrs, controller,
         })
         .catch(function(){
             show(element);
-        })
+        });
 
     element.on('$destroy', function(){
         // Clean up $scope watcher
         watcher();
     });
-};
+}
 
 export function roleRestrictConfig(PCAuth, $parse) {
 
@@ -69,9 +69,6 @@ export function roleRestrictConfig(PCAuth, $parse) {
     return {
         restict: 'E',
         transclude: true,
-        // scope: {
-        //     restrict: '&pcRoleRestrict'
-        // },
         link: RoleRestricterLink
     };
-};
+}

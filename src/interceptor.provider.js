@@ -28,42 +28,37 @@ export class responseErrorHandlers{
         };
     }
 
-};
+}
 
 export class InterceptorConfig{
 
     constructor(){
         this.responseErrorHandlers = new responseErrorHandlers();
-    };
+    }
 
-};
+}
 
 export class AuthInterceptor{
 
     constructor(config){
-        //console.log('Initiating AuthInterceptor', this);
         _config = config;
-    };
+    }
 
     request(config){
-        //console.log('AuthInterceptor', 'request');
         config.headers = config.headers || {};
         if(_$cookies.get('token')) {
-            //console.log(`Bearer ${_$cookies.get('token')}`);
             config.headers.Authorization = `Bearer ${_$cookies.get('token')}`;
         }
         return config;
-    };
+    }
 
     responseError(response){
-        // console.error('AuthInterceptor', 'responseError', response);
         let handler = _config.responseErrorHandlers[response.status] || noop;
         handler(response.data, _$injector);
-        return _$q.reject(response)
-        // return response;
-    };
+        return _$q.reject(response);
+    }
 
-};
+}
 
 export function PCAuthInterceptorProvider(){
 
@@ -78,4 +73,4 @@ export function PCAuthInterceptorProvider(){
         return new AuthInterceptor(self.config );
     };
 
-};
+}

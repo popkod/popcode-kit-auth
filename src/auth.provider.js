@@ -31,7 +31,7 @@ export class User{
                 user[key] = data[key];
             }
         });
-    };
+    }
 
     /**
      * Check if user had one of the provided roles
@@ -42,16 +42,16 @@ export class User{
 
         if(role && Array.isArray(role)){
             roleList = role;
-        }else if (role && typeof role == 'string') {
+        }else if (role && typeof role === 'string') {
             roleList = [Number(role)];
-        }else if(role && typeof role == 'number'){
+        }else if(role && typeof role === 'number'){
             roleList = [role];
         }else{
             return true;
         }
 
         return roleList.indexOf(this.role) > -1;
-    };
+    }
 
     /**
      * Cheks the token lifetime and returns different values
@@ -80,7 +80,6 @@ export class User{
                 if(!this.tokenExpirationHandled){
                     this.tokenExpirationHandled = true;
                     return -1;
-                    return;
                 }else{
                     return -2;
                 }
@@ -104,7 +103,7 @@ export class User{
         this.token = token;
         this.tokenExpirationHandled = false;
     }
-};
+}
 
 /**
  * Default configuration Object
@@ -117,7 +116,7 @@ export class AuthConfig{
             auth.refreshToken();
         };
     }
-};
+}
 
 /**
  * Auth Class
@@ -130,7 +129,7 @@ export class Auth{
         this.config = config;
         this._me = this._getMe();
         this._tokenChecker();
-    };
+    }
 
     /**
      * Handles form errors
@@ -282,7 +281,6 @@ export class Auth{
                 auth._me = new User({});
                 auth._runStatusChangeCallbacks(auth._me);
             });
-            ;
         });
     }
 
@@ -343,7 +341,9 @@ export class Auth{
      * @param {object}  me  user object what won't be used
      * @return void
      */
-    set me(me) {};
+    set me(){
+
+    }
 
     getToken(){
         //console.log('get token');

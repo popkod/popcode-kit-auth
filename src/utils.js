@@ -1,9 +1,9 @@
 'use strict';
+/* globals angular */
 
 export function checkModulesLoaded(moduleList){
     if(typeof angular === 'undefined'){
         throw new Error('ERROR: Angular is not defined. Please include it first.');
-        return;
     }
     moduleList.forEach(module => {
         try {
@@ -12,6 +12,6 @@ export function checkModulesLoaded(moduleList){
             console.error(`Error: dependency ${module} not loaded.`);
         }
     });
-};
+}
 
-export function noop(){};
+export function noop(){}
