@@ -341,7 +341,7 @@ export class Auth{
      * @param {object}  me  user object what won't be used
      * @return void
      */
-    set me(){
+    set me(_me){
 
     }
 
@@ -359,7 +359,7 @@ export class Auth{
         return _$q.when(value)
             .then(me => {
                 return me.hasRole(roles);
-            })
+            });
     }
 
     /**
@@ -372,10 +372,10 @@ export class Auth{
         auth._addStatusChangeCallback(cb);
         return function(){
             auth._removeStatusChangeCallback(cb);
-        }
+        };
     }
 
-};
+}
 
 /**
  * PCAuth Provider
@@ -397,4 +397,4 @@ export function PCAuthProvider(){
          _jwtHelper = jwtHelper;
          return new Auth(self.config, PCUser);
      };
-};
+}
