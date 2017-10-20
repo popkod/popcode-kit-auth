@@ -3,7 +3,7 @@ module.exports = function(grunt){
     grunt.initConfig({
         webpack: {
             dist: {
-                entry: "./index.js",
+                entry: "./index.bower.js",
                 output: {
                     path: './dist',
                     filename: 'index.js'
