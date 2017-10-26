@@ -27,7 +27,7 @@ function addInterceptor($httpProvider) {
 
 angular.module(MODULE_NAME, dependencies)
     .provider('PCAuthInterceptor', PCAuthInterceptorProvider)
-    .provider('StateCHangeHandlerProvider', StateCHangeHandlerProvider)
+    .provider('StateCHangeHandler', StateCHangeHandlerProvider)
     .run(routerDecorator)
     .provider('PCAuth', PCAuthProvider)
     .provider('PCUser', PCUserProvider)
