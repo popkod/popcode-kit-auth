@@ -9,6 +9,7 @@ import angularJWT from 'angular-jwt';
 
 import {checkModulesLoaded} from './src/utils';
 import {PCAuthProvider} from './src/auth.provider';
+import {StateCHangeHandlerProvider} from './src/state-change-handler.provider';
 import {PCAuthInterceptorProvider} from './src/interceptor.provider';
 import {PCUserProvider} from './src/user.provider';
 import {routerDecorator} from './src/router.decorator';
@@ -24,8 +25,9 @@ function addInterceptor($httpProvider) {
   $httpProvider.interceptors.push('PCAuthInterceptor');
 }
 
-angular.module('popcode-kit.auth', dependencies)
+angular.module(MODULE_NAME, dependencies)
     .provider('PCAuthInterceptor', PCAuthInterceptorProvider)
+    .provider('StateCHangeHandlerProvider', StateCHangeHandlerProvider)
     .run(routerDecorator)
     .provider('PCAuth', PCAuthProvider)
     .provider('PCUser', PCUserProvider)
@@ -33,4 +35,4 @@ angular.module('popcode-kit.auth', dependencies)
     .config(['$httpProvider', addInterceptor])
     ;
 
-export default 'popcode-kit.auth';
+export default MODULE_NAME;
